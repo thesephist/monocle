@@ -1,11 +1,18 @@
 std := load('../vendor/std')
 str := load('../vendor/str')
+json := load('../vendor/json')
 
 log := std.log
+f := std.format
 scan := std.scan
 map := std.map
 each := std.each
 append := std.append
+readFile := std.readFile
+writeFile := std.writeFile
+split := str.split
+deJSON := json.de
+serJSON := json.ser
 
 tokenizer := load('../lib/tokenizer')
 tokenize := tokenizer.tokenize
@@ -21,47 +28,68 @@ findDocs := searcher.findDocs
 Modules := {
 	entr: load('../modules/entr')
 }
+ModuleState := {
+	loadedModules: 0
+}
 
 ` Doc : {
 	id: string
-	freqs: Map<string, number>
-	tokens: List<string>
-	getContent: () => {{ original doc }}
+	tokens: Map<string, number>
 } `
 
-State := {
-	loadedModules: 0
-}
 Docs := []
+
+lazyGetDocs := (moduleKey, getDocs, withDocs) => readFile(f('./indexes/{{ 0 }}.json', [moduleKey]), file => file :: {
+	() -> (
+		log(f('[{{ 0 }}] re-generating index', [moduleKey]))
+		getDocs(docs => writeFile(f('./indexes/{{ 0 }}.json', [moduleKey]), serJSON(docs), res => res :: {
+			true -> withDocs(docs)
+			_ -> (
+				log('[main] failed to persist generated index for ' + moduleKey)
+				withDocs([])
+			)
+		}))
+	)
+	_ -> withDocs(deJSON(file))
+})
 
 each(keys(Modules), moduleKey => (
 	module := Modules.(moduleKey)
 	getDocs := module.getDocs
-	getDocs(docs => (
-		DocList := []
-		each(docs, doc => (
-			Docs.(doc.id) := doc
-			DocList.len(DocList) := doc
-		))
+	lazyGetDocs(moduleKey, getDocs, docs => (
+		each(docs, doc => Docs.(doc.id) := doc)
 
-		State.loadedModules := State.loadedModules + 1
-		State.loadedModules :: {
-			len(Modules) -> (
-				` TODO: clean up interfaces aorund this stuff, so we can have
-				Docs as the universal argument type rather than Docs and
-				DocList. `
-				Index := indexDocs(DocList)
-
-				(sub := () => (
-					out('> ')
-					scan(line => (
-						Matches := findDocs(Index, Docs, line)
-						each(Matches, doc => log((doc.getContent)()))
-						sub()
-					))
-				))()
-			)
+		ModuleState.loadedModules := ModuleState.loadedModules + 1
+		ModuleState.loadedModules :: {
+			len(Modules) -> main(indexDocs(docs))
 		}
 	))
 ))
+
+main := index => (sub := () => (
+	out('> ')
+	scan(line => (
+		start := time()
+		matches := findDocs(index, Docs, line)
+		log(f('searched in {{ 0 }}ms', [floor((time() - start) * 1000)]))
+
+		matches :: {
+			[] -> sub()
+			_ -> (
+				contents := []
+				each(matches, doc => (
+					idParts := split(doc.id, '/')
+					moduleKey := idParts.0
+					moduleID := idParts.1
+
+					(Modules.(moduleKey).getDocContent)(moduleID, content => (
+						len(contents.len(contents) := content) :: {
+							len(matches) -> sub(each(contents, log))
+						}
+					))
+				))
+			)
+		}
+	))
+))()
 

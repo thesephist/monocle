@@ -78,11 +78,12 @@ tokenize := s => (
 	` make a full copy of the input, since we will mutate it `
 	s := '' + s
 	removePunct(s)
-	filter(splitByWhitespace(lower(s)), notStopword?)
-)
+	tokens := filter(splitByWhitespace(lower(s)), notStopword?)
 
-tokenFrequencyMap := tokens => reduce(tokens, (freqs, tok) => freq := freqs.(tok) :: {
-	() -> freqs.(tok) := 1
-	_ -> freqs.(tok) := freq + 1
-}, {})
+	` generate a frequency map `
+	reduce(tokens, (freqs, tok) => freq := freqs.(tok) :: {
+		() -> freqs.(tok) := 1
+		_ -> freqs.(tok) := freq + 1
+	}, {})
+)
 

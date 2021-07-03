@@ -20,7 +20,7 @@ includes? := (arr, it) => (sub := i => arr.(i) :: {
 })(0)
 
 findDocs := (index, docs, query) => (
-	queryTokens := tokenize(query)
+	queryTokens := keys(tokenize(query))
 
 	queryTokens :: {
 		[] -> []

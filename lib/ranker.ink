@@ -10,15 +10,13 @@ map := std.map
 reduce := std.reduce
 sortBy := quicksort.sortBy
 
-docTermFrequency := (doc, token) => doc.freqs.(token)
-docInverseFrequency := (doc, token) => ln(doc.freqs.(token) / len(doc.tokens))
+docTermFrequency := (doc, token) => doc.tokens.(token)
+docInverseFrequency := (doc, token) => ln(doc.tokens.(token) / len(doc.tokens))
 docTFIDF := (doc, token) => docTermFrequency(doc, token) * docInverseFrequency(doc, token)
 
-rankDocs := (matchingDocs, queryTokens) => (
-	sortBy(matchingDocs, doc => (
-		` ranking score is the sum of TF-IDF for all terms `
-		tokenScores := map(queryTokens, token => docTFIDF(doc, token))
-		~reduce(tokenScores, (a, b) => a + b, 0)
-	))
-)
+rankDocs := (matchingDocs, queryTokens) => sortBy(matchingDocs, doc => (
+	` ranking score is the sum of TF-IDF for all terms `
+	tokenScores := map(queryTokens, token => docTFIDF(doc, token))
+	~reduce(tokenScores, (a, b) => a + b, 0)
+))
 

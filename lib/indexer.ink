@@ -6,14 +6,14 @@ std := load('../vendor/std')
 log := std.log
 each := std.each
 
-indexDoc := (index, doc) => each(doc.tokens, token => docIDs := index.(token) :: {
+indexDoc := (index, doc) => each(keys(doc.tokens), token => docIDs := index.(token) :: {
 	() -> index.(token) := [doc.id]
 	_ -> docIDs.len(docIDs) := doc.id
 })
 
 indexDocs := docs => (
 	index := {}
-	each(docs, doc => indexDoc(index, doc))
+	each(keys(docs), docID => indexDoc(index, docs.(docID)))
 
 	index
 )

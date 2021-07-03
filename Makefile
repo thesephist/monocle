@@ -2,7 +2,7 @@ all: run
 
 # run app server
 run:
-	ink src/main.ink
+	rlwrap ink src/main.ink
 
 # build dependencies
 build-libs:
