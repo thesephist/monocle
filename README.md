@@ -1,2 +1,4 @@
-# bastion
-Universal search, for my entire life
+# Bastion
+
+Universal search, for my entire life.
+
