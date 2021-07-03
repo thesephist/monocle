@@ -27,6 +27,8 @@ findDocs := searcher.findDocs
 ` modules `
 Modules := {
 	entr: load('../modules/entr')
+	lifelog: load('../modules/lifelog')
+	ligature: load('../modules/ligature')
 }
 ModuleState := {
 	loadedModules: 0
@@ -35,6 +37,8 @@ ModuleState := {
 ` Doc : {
 	id: string
 	tokens: Map<string, number>
+	content: string
+	href: string | ()
 } `
 
 Docs := []
@@ -46,7 +50,7 @@ lazyGetDocs := (moduleKey, getDocs, withDocs) => readFile(f('./indexes/{{ 0 }}.j
 			true -> withDocs(docs)
 			_ -> (
 				log('[main] failed to persist generated index for ' + moduleKey)
-				withDocs([])
+				withDocs(docs)
 			)
 		}))
 	)
@@ -61,7 +65,7 @@ each(keys(Modules), moduleKey => (
 
 		ModuleState.loadedModules := ModuleState.loadedModules + 1
 		ModuleState.loadedModules :: {
-			len(Modules) -> main(indexDocs(docs))
+			len(Modules) -> main(indexDocs(Docs))
 		}
 	))
 ))
@@ -74,22 +78,11 @@ main := index => (sub := () => (
 		log(f('searched in {{ 0 }}ms', [floor((time() - start) * 1000)]))
 
 		matches :: {
-			[] -> sub()
-			_ -> (
-				contents := []
-				each(matches, doc => (
-					idParts := split(doc.id, '/')
-					moduleKey := idParts.0
-					moduleID := idParts.1
-
-					(Modules.(moduleKey).getDocContent)(moduleID, content => (
-						len(contents.len(contents) := content) :: {
-							len(matches) -> sub(each(contents, log))
-						}
-					))
-				))
-			)
+			[] -> ()
+			_ -> each(matches, doc => log(doc.content))
 		}
+
+		sub()
 	))
 ))()
 

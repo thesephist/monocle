@@ -23,43 +23,20 @@ Newline := char(10)
 
 EntrFilePath := env().HOME + '/noctd/notes/entrepreneurship-notes.md'
 
-EntrFileLines := []
-EntrFileReadCallbacks := []
-dispatchFileReadCallbacks := file => (
-	log('[entr] reading entr database...')
-	lines := split(file, Newline)
-	nonEmptyLines := filter(lines, line => len(trim(line, ' ')) > 0)
-	append(EntrFileLines, nonEmptyLines)
-	each(EntrFileReadCallbacks, (withLines, i) => (
-		EntrFileReadCallbacks.(i) := ()
-		withLines(EntrFileLines)
-	))
-)
-getEntrFileLines := withLines => len(EntrFileLines) > 0 :: {
-	true -> withLines(EntrFileLines)
-	_ -> (
-		EntrFileReadCallbacks.len(EntrFileReadCallbacks) := withLines
-		EntrFileReadCallbacks :: {
-			[_] -> readFile(EntrFilePath, file => file :: {
-				() -> (
-					log('[entr] could not read entr notes file!')
-					[]
-				)
-				_ -> dispatchFileReadCallbacks(file)
-			})
-		}
+getDocs := withDocs => readFile(EntrFilePath, file => file :: {
+	() -> (
+		log('[entr] could not read entr notes file!')
+		[]
 	)
-}
+	_ -> (
+		lines := split(file, Newline)
+		nonEmptyLines := filter(lines, line => len(trim(line, ' ')) > 0)
+		docs := map(nonEmptyLines, (line, i) => {
+			id: 'entr/' + string(i)
+			tokens: tokenize(line)
+			content: line
+		})
+		withDocs(docs)
+	)
+})
 
-getDocs := withDocs => getEntrFileLines(lines => (
-	docs := map(lines, (line, i) => {
-		id: 'entr/' + string(i)
-		tokens: tokenize(line)
-	})
-	withDocs(docs)
-))
-
-getDocContent := (docID, withContent) => getEntrFileLines(lines => (
-	content := lines.(docID)
-	withContent(content)
-))

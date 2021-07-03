@@ -27,7 +27,7 @@ each(Stopwords, word => StopwordMap.(word) := true)
 notStopword? := w => StopwordMap.(w) = ()
 
 ` TODO: could be hand-unrolled into a single match expression `
-Puncts := '.,:;?!@#%&*()[]{}\|/<>~\'"-_+='
+Puncts := '.,:;?!@#%&*()[]{}\|/<>~"-_+='
 punct? := c => (sub := i => Puncts.(i) :: {
 	() -> false
 	c -> true
