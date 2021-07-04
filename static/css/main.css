@@ -165,6 +165,9 @@ li.search-result {
     font-weight: normal;
     padding: 5px 12px;
     border-bottom: 1px solid var(--active-bg);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .search-result.selected {
@@ -175,13 +178,18 @@ li.search-result {
 	background: var(--hover-bg);
 }
 
+.search-result .search-result-module {
+	display: inline-block;
+	width: 100px;
+}
+
+.search-result .search-result-title {
+}
+
 .search-result .search-result-content {
     overflow: hidden;
     line-height: 1.4em;
-    font-size: 14px;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+	color: var(--secondary-text);
 }
 
 .doc-preview {

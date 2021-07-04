@@ -39,6 +39,8 @@ ModuleState := {
 	id: string
 	tokens: Map<string, number>
 	content: string
+
+	title: string | ()
 	href: string | ()
 } `
 

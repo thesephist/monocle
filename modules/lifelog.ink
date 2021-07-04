@@ -55,6 +55,11 @@ getDocsFromLifeLog := file => (
 				id: 'lifelog/' + slice(line, 0, 10)
 				tokens: tokenize(line + ' ' + entryContent)
 				content: line + Newline + replace(entryContent, ' // ', Newline)
+				title: (sub := i => line.(i) :: {
+					() -> line
+					':' -> slice(line, 0, i)
+					_ -> sub(i + 1)
+				})(0)
 			}
 		}
 	})

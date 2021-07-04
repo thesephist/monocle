@@ -11,6 +11,7 @@ filter := std.filter
 append := std.append
 flatten := std.flatten
 readFile := std.readFile
+index := str.index
 split := str.split
 trim := str.trim
 
@@ -44,6 +45,14 @@ getDocs := withDocs => dir(ContentDir, evt => evt.type :: {
 						id: 'www/' + post.name
 						tokens: tokenize(post.content)
 						content: post.content
+						` NOTE: leaning on a lot of implicit assumptions about
+						the way thesephist/www posts are formatted in Markdown
+						front matter. `
+						title: slice(
+							post.content
+							index(post.content, '"')
+							index(post.content, 'date: ') - 2
+						)
 					}
 				))
 				withDocs(docs)

@@ -39,11 +39,22 @@ getDocs := withDocs => dir(LigatureDir, evt => evt.type :: {
 
 		ifAllRead := () => len(notes) :: {
 			len(entries) -> (
-				docs := map(notes, note => {
-					id: 'ligature/' + note.name
-					tokens: tokenize(note.content)
-					content: note.content
-				})
+				docs := map(notes, note => (
+
+					content := note.content
+					firstNewline := (sub := i => content.(i) :: {
+						() -> i
+						Newline -> i
+						_ -> sub(i + 1)
+					})(0)
+
+					{
+						id: 'ligature/' + note.name
+						tokens: tokenize(content)
+						content: content
+						title: slice(content, 0, firstNewline)
+					}
+				))
 				withDocs(docs)
 			)
 		}

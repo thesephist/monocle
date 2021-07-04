@@ -62,7 +62,7 @@ fetchModuleDocs := moduleKey => (
 	json := bind(req, 'then')(resp => bind(resp, 'json')())
 	bind(json, 'then')(docs => (
 		LoadedModules.len(LoadedModules) := moduleKey
-		each(docs, doc => State.docs.(doc.id) := doc)
+		each(docs, doc => State.docs.(doc.id) := (doc.module := moduleKey))
 		len(LoadedModules) :: {
 			len(Modules) -> (
 				State.index := indexDocs(State.docs)
@@ -113,11 +113,14 @@ SearchResult := (doc, i, highlighter) => hae(
 		)
 	}
 	[
+		h('span', ['search-result-module'], [doc.module])
+		h('span', ['search-result-title'], [doc.title])
+		' · '
 		` for efficiency, we do not generate a new element every time and
 		instead try to reuse elements on the page if there are any. `
 		existingEl := querySelector('[data-doc-id="' + doc.id + '"]') :: {
 			() -> (
-				container := bind(document, 'createElement')('div')
+				container := bind(document, 'createElement')('span')
 				bind(container, 'setAttribute')('data-doc-id', doc.id)
 				container.className := 'search-result-content'
 				container.innerHTML := highlighter(fastSlice(doc.content, 0, MaxPreviewChars))
