@@ -13,11 +13,12 @@ ranker := load('ranker')
 tokenize := tokenizer.tokenize
 rankDocs := ranker.rankDocs
 
-includes? := (arr, it) => (sub := i => arr.(i) :: {
-	it -> true
-	() -> false
-	_ -> sub(i + 1)
-})(0)
+listToSet := list => reduce(list, (acc, it) => acc.(it) := true, {})
+
+intersectionSet := (a, b) => reduce(keys(a), (intersection, it) => b.(it) :: {
+	true -> intersection.(it) := true
+	_ -> intersection
+}, {})
 
 findDocs := (index, docs, query) => (
 	queryTokens := keys(tokenize(query))
@@ -33,11 +34,14 @@ findDocs := (index, docs, query) => (
 				}
 			)
 
-			matchingDocIDs := reduce(
-				slice(docMatches, 0, len(docMatches))
-				(acc, docIDs) => filter(acc, docID => includes?(docIDs, docID))
-				docMatches.0
-			)
+			` we perform this operation by accumulating on a set of docIDs
+			rather than a list, to avoid quadratic is-element checks. `
+			docMatchesAsMaps := map(docMatches, listToSet)
+			matchingDocIDs := keys(reduce(
+				slice(docMatchesAsMaps, 1, len(docMatchesAsMaps))
+				intersectionSet
+				docMatchesAsMaps.0
+			))
 
 			matchingDocs := map(matchingDocIDs, id => docs.(id))
 
