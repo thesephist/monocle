@@ -55,16 +55,30 @@ State := {
 	theme: 'light'
 }
 
+ready? := () => ~(State.docs = () | State.index = ())
+
 fetchDocs := () => (
 	req := fetch('/indexes/docs.json')
 	json := bind(req, 'then')(resp => bind(resp, 'json')())
-	bind(json, 'then')(index => render(State.docs := index))
+	bind(json, 'then')(docs => (
+		State.docs := docs
+		ready?() :: {
+			true -> performSearch()
+			_ -> render()
+		}
+	))
 )
 
 fetchIndex := () => (
 	req := fetch('/indexes/index.json')
 	json := bind(req, 'then')(resp => bind(resp, 'json')())
-	bind(json, 'then')(index => render(State.index := index))
+	bind(json, 'then')(index => (
+		State.index := index
+		ready?() :: {
+			true -> performSearch()
+			_ -> render()
+		}
+	))
 )
 
 ` ui components `
@@ -84,9 +98,7 @@ SearchBox := () => h('div', ['search-box'], [
 		{
 			input: evt => (
 				State.query := evt.target.value
-				render()
-
-				updateResults()
+				performSearch()
 			)
 		}
 		[]
@@ -167,8 +179,8 @@ SearchResults := () => h('div', ['search-results'], [
 Sidebar := () => h('div', ['sidebar'], [
 	SearchBox()
 	h('div', ['sidebar-stats'], [
-		State.docs = () | State.index = () :: {
-			true -> 'loading index...'
+		ready?() :: {
+			false -> 'loading index...'
 			_ -> h('div', ['sidebar-result-stats'], [
 				f('{{ 0 }} results ({{ 1 }}ms)', [len(State.results), State.searchElapsedMs])
 			])
@@ -199,14 +211,29 @@ DocPreview := () => h('div', ['doc-preview'], [
 
 ` state updaters `
 
-updateResults := () => (
+performSearch := () => (
 	start := time()
 	State.results := findDocs(State.index, State.docs, State.query)
 	State.searchElapsedMs := floor((time() - start) * 1000)
 	State.selectedIdx := 0
 	State.showAllResults? := false
 	trim(State.query, ' ') :: {
-		'' -> State.showPreview? := false
+		'' -> (
+			State.showPreview? := false
+
+			url := jsnew(URL, [location.href])
+			bind(url.searchParams, 'delete')('q')
+			bind(history, 'replaceState')((), (), url)
+
+			document.title := 'Monocle'
+		)
+		_ -> (
+			url := jsnew(URL, [location.href])
+			bind(url.searchParams, 'set')('q', trim(State.query, ' '))
+			bind(history, 'replaceState')((), (), url)
+
+			document.title := f('"{{ query }}" | Monocle', State)
+		)
 	}
 	render()
 )
@@ -277,7 +304,14 @@ bind(document.body, 'addEventListener')('keydown', evt => evt.key :: {
 	)
 })
 
+query := bind(jsnew(URL, [location.href]).searchParams, 'get')('q') :: {
+	'' -> ()
+	() -> ()
+	_ -> State.query := query
+}
+
 fetchDocs()
 fetchIndex()
+
 render()
 
