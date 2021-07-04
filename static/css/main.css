@@ -50,12 +50,6 @@ button {
     font-size: 1em;
 }
 
-button,
-button:hover,
-button:active {
-    color: var(--primary-text);
-}
-
 pre,
 code {
     font-size: 1em;
@@ -191,6 +185,22 @@ li.search-result {
     overflow: hidden;
     line-height: 1.4em;
 	color: var(--secondary-text);
+}
+
+.search-results-show-all {
+	cursor: pointer;
+	background: transparent;
+	border: 0;
+	color: var(--secondary-text);
+	padding: 6px 12px;
+}
+
+.search-results-show-all:hover {
+	text-decoration: underline;
+}
+
+.search-results-bottom-padding {
+	height: 6em;
 }
 
 .doc-preview {

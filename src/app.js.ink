@@ -153,6 +153,12 @@ SearchResults := () => h('div', ['search-results'], [
 			maxPreviewChars
 		))
 	))
+	~(State.showAllResults?) & len(State.results) > clippedResultsCount() :: {
+		true -> hae('button', ['search-results-show-all'], {}, {
+			click: () => render(State.showAllResults? := true)
+		}, ['Show more ...'])
+	}
+	h('div', ['search-results-bottom-padding'], [])
 ])
 
 Sidebar := () => h('div', ['sidebar'], [
@@ -195,6 +201,7 @@ updateResults := () => (
 	State.results := findDocs(State.index, State.docs, State.query)
 	State.searchElapsedMs := floor((time() - start) * 1000)
 	State.selectedIdx := 0
+	State.showAllResults? := false
 	trim(State.query, ' ') :: {
 		'' -> State.showPreview? := false
 	}
