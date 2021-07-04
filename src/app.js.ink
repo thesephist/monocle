@@ -75,7 +75,10 @@ SearchBox := () => h('div', ['search-box'], [
 		['search-box-input']
 		{
 			value: State.query
-			placeholder: 'Search...'
+			placeholder: State.docs :: {
+				() -> 'Search...'
+				_ -> 'Search ' + string(len(State.docs)) + ' docs'
+			}
 			autofocus: true
 		}
 		{
