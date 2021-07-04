@@ -7,7 +7,6 @@ f := std.format
 ` constants `
 
 Newline := char(10)
-MaxPreviewChars := 500
 
 LoadedModules := []
 Modules := [
@@ -96,7 +95,7 @@ SearchBox := () => h('div', ['search-box'], [
 	)
 ])
 
-SearchResult := (doc, i, highlighter) => hae(
+SearchResult := (doc, i, highlighter, maxPreviewChars) => hae(
 	'li'
 	[
 		'search-result'
@@ -124,7 +123,12 @@ SearchResult := (doc, i, highlighter) => hae(
 				container := bind(document, 'createElement')('span')
 				bind(container, 'setAttribute')('data-doc-id', doc.id)
 				container.className := 'search-result-content'
-				container.innerHTML := highlighter(fastSlice(doc.content, 0, MaxPreviewChars))
+
+				ellipsis := (len(doc.content) > maxPreviewChars :: {
+					true -> '...'
+					_ -> ''
+				})
+				container.innerHTML := highlighter(fastSlice(doc.content, 0, maxPreviewChars)) + ellipsis
 				container
 			)
 			_ -> existingEl
@@ -134,8 +138,16 @@ SearchResult := (doc, i, highlighter) => hae(
 
 SearchResults := () => h('div', ['search-results'], [
 	h('ol', ['search-results-list'], (
+		` NOTE: this is an arbitrary heuristic that tries to scale preview size with
+		screen width, and seems to work well enough.`
+		maxPreviewChars := floor(window.innerWidth / 6)
 		highlighter := applyHighlights(State.query)
-		map(State.results, (result, i) => SearchResult(result, i, highlighter))
+		map(State.results, (result, i) => SearchResult(
+			result
+			i
+			highlighter
+			maxPreviewChars
+		))
 	))
 ])
 
@@ -159,7 +171,7 @@ DocPreview := () => h('div', ['doc-preview'], [
 		])
 		_ -> h('div', ['doc-preview-content'], (
 			highlighter := applyHighlights(State.query)
-			map(split(selectedDoc.content, Newline), para => (
+			map(split(selectedDoc.title + Newline + selectedDoc.content, Newline), para => (
 				p := bind(document, 'createElement')('p')
 				p.innerHTML := highlighter(para)
 				p

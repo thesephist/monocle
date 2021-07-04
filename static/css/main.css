@@ -156,6 +156,7 @@ textarea {
 
 .search-results {
     overflow-y: auto;
+	-webkit-overflow-scrolling: auto;
 }
 
 .search-results ol.search-results-list {
@@ -167,7 +168,7 @@ li.search-result {
 	list-style: none;
     cursor: pointer;
     font-weight: normal;
-    padding: 5px 12px;
+    padding: 6px 12px;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -194,9 +195,16 @@ li.search-result {
 
 .doc-preview {
 	width: calc(100% - var(--sidebar-width));
+	min-width: 320px;
     max-width: 800px;
 	overflow-y: auto;
+	-webkit-overflow-scrolling: auto;
     background: var(--primary-bg);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, .25);
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	right: 0;
 }
 
 /* Merlot Markdown output styles */

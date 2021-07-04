@@ -51,7 +51,7 @@ getDocs := withDocs => dir(LigatureDir, evt => evt.type :: {
 					{
 						id: 'ligature/' + note.name
 						tokens: tokenize(content)
-						content: content
+						content: slice(content, firstNewline, len(content))
 						title: slice(content, 0, firstNewline)
 					}
 				))

@@ -33,6 +33,7 @@ getDocs := withDocs => readFile(EntrFilePath, file => file :: {
 	_ -> (
 		S := {
 			heading: ''
+			noteGroup: ''
 		}
 
 		lines := split(file, Newline)
@@ -40,11 +41,23 @@ getDocs := withDocs => readFile(EntrFilePath, file => file :: {
 
 		docs := []
 		each(nonEmptyLines, (line, i) => hasPrefix?(line, '#') :: {
-			true -> S.heading := trimPrefix(trimPrefix(line, '#'), ' ')
-			_ -> docs.len(docs) := {
-				id: 'entr/' + string(i)
-				tokens: tokenize(S.heading + line)
-				content: S.heading + Newline + line
+			true -> (
+				docs.len(docs) := {
+					id: 'entr/' + string(i)
+					tokens: tokenize(S.heading + S.noteGroup)
+					content: S.noteGroup
+					title: S.heading
+				}
+				S.heading := trimPrefix(trimPrefix(line, '#'), ' ')
+				S.noteGroup := ''
+			)
+			_ -> S.heading :: {
+				'' -> docs.len(docs) := {
+					id: 'entr/' + string(i)
+					tokens: tokenize(line)
+					content: line
+				}
+				_ -> S.noteGroup := S.noteGroup + Newline + line
 			}
 		})
 		withDocs(docs)

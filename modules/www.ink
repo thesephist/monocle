@@ -44,7 +44,8 @@ getDocs := withDocs => dir(ContentDir, evt => evt.type :: {
 					{
 						id: 'www/' + post.name
 						tokens: tokenize(post.content)
-						content: post.content
+						` NOTE: for visual effect, we cut the first '---' `
+						content: slice(post.content, 5, len(post.content))
 						` NOTE: leaning on a lot of implicit assumptions about
 						the way thesephist/www posts are formatted in Markdown
 						front matter. `
