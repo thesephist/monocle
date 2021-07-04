@@ -43,10 +43,10 @@ ModuleState := {
 
 Docs := []
 
-lazyGetDocs := (moduleKey, getDocs, withDocs) => readFile(f('./indexes/{{ 0 }}.json', [moduleKey]), file => file :: {
+lazyGetDocs := (moduleKey, getDocs, withDocs) => readFile(f('./static/indexes/{{ 0 }}.json', [moduleKey]), file => file :: {
 	() -> (
 		log(f('[{{ 0 }}] re-generating index', [moduleKey]))
-		getDocs(docs => writeFile(f('./indexes/{{ 0 }}.json', [moduleKey]), serJSON(docs), res => res :: {
+		getDocs(docs => writeFile(f('./static/indexes/{{ 0 }}.json', [moduleKey]), serJSON(docs), res => res :: {
 			true -> withDocs(docs)
 			_ -> (
 				log('[main] failed to persist generated index for ' + moduleKey)

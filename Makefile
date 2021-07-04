@@ -13,6 +13,14 @@ build-libs:
 		vendor/quicksort.ink \
 		> static/ink/lib.js
 
+build-bastion:
+	september translate \
+		lib/tokenizer.ink \
+		lib/indexer.ink \
+		lib/ranker.ink \
+		lib/searcher.ink \
+		> static/ink/bastion.js
+
 # build app clients
 build:
 	cat static/js/ink.js \
@@ -25,12 +33,13 @@ build:
 	cat \
 		static/ink/vendor.js \
 		static/ink/lib.js \
+		static/ink/bastion.js \
 		static/ink/common.js \
 		> static/ink/bundle.js
 b: build
 
 # run all builds from scratch
-build-all: build-libs build
+build-all: build-libs build-bastion build
 
 # build whenever Ink sources change
 watch:

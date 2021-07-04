@@ -7,13 +7,17 @@ str := load('../vendor/str')
 
 log := std.log
 slice := std.slice
+cat := std.cat
 map := std.map
 each := std.each
 filter := std.filter
 append := std.append
 flatten := std.flatten
+every := std.every
 readFile := std.readFile
+digit? := str.digit?
 split := str.split
+replace := str.replace
 trim := str.trim
 
 tokenizer := load('../lib/tokenizer')
@@ -24,18 +28,38 @@ Newline := char(10)
 
 LifeLogDir := env().HOME + '/noctd/notes/LifeLog/'
 LifeLogFileNames := [
+	'LifeLog-2014.md'
+	'LifeLog-2015.md'
+	'LifeLog-2016.md'
+	'LifeLog-2017.md'
+	'LifeLog-2018.md'
 	'LifeLog-2019.md'
 	'LifeLog-2020.md'
 	'LifeLog-2021.md'
 ]
 
+entryHeader? := line => dateParts := split(slice(line, 0, 10), '-') :: {
+	[_, _, _] -> every(map(cat(dateParts, ''), digit?))
+	_ -> false
+}
+
 getDocsFromLifeLog := file => (
 	lines := split(file, Newline)
-	docs := map(lines, (line, i) => {
-		id: 'lifelog/' + string(i)
-		tokens: tokenize(line)
-		content: line
+
+	docs := []
+	each(lines, (line, i) => entryHeader?(line) :: {
+		false -> ()
+		_ -> entryContent := lines.(i + 2) :: {
+			() -> ()
+			_ -> docs.len(docs) := {
+				id: 'lifelog/' + slice(line, 0, 10)
+				tokens: tokenize(line + ' ' + entryContent)
+				content: line + Newline + replace(entryContent, ' // ', Newline)
+			}
+		}
 	})
+
+	docs
 )
 
 getDocs := withDocs => (
