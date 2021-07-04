@@ -39,13 +39,12 @@ getDocs := withDocs => dir(ContentDir, evt => evt.type :: {
 
 		ifAllRead := () => len(posts) :: {
 			len(entries) -> (
-				docs := map(posts, post => (
+				docs := map(posts, (post, i) => (
 					log('[www] tokenizing post ' + post.name)
 					{
-						id: 'www/' + post.name
+						id: 'www' + string(i)
 						tokens: tokenize(post.content)
-						` NOTE: for visual effect, we cut the first '---' `
-						content: slice(post.content, 5, len(post.content))
+						content: post.content
 						` NOTE: leaning on a lot of implicit assumptions about
 						the way thesephist/www posts are formatted in Markdown
 						front matter. `

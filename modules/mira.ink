@@ -65,7 +65,7 @@ getDocs := withDocs => readFile(MiraFilePath, file => file :: {
 			personEntry := cat(lines, Newline)
 
 			{
-				id: 'mira/' + string(i)
+				id: 'mira' + string(i)
 				tokens: tokenize(person.name + ' ' + personEntry)
 				content: personEntry
 				title: person.name

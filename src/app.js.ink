@@ -8,16 +8,6 @@ f := std.format
 
 Newline := char(10)
 
-LoadedModules := []
-Modules := [
-	'www'
-	'entr'
-	'mira'
-	'lifelog'
-	'ligature'
-	'ideaflow'
-]
-
 ` utilities `
 
 querySelector := bind(document, 'querySelector')
@@ -55,7 +45,7 @@ applyHighlights := query => (
 
 State := {
 	query: ''
-	docs: {}
+	docs: ()
 	index: ()
 	results: []
 	searchElapsedMs: 0
@@ -65,20 +55,16 @@ State := {
 	theme: 'light'
 }
 
-fetchModuleDocs := moduleKey => (
-	req := fetch(f('/indexes/{{ 0 }}.json', [moduleKey]))
+fetchDocs := () => (
+	req := fetch('/indexes/docs.json')
 	json := bind(req, 'then')(resp => bind(resp, 'json')())
-	bind(json, 'then')(docs => (
-		LoadedModules.len(LoadedModules) := moduleKey
-		each(docs, doc => State.docs.(doc.id) := (doc.module := moduleKey))
-		len(LoadedModules) :: {
-			len(Modules) -> (
-				start := time()
-				State.index := indexDocs(State.docs)
-				render()
-			)
-		}
-	))
+	bind(json, 'then')(index => render(State.docs := index))
+)
+
+fetchIndex := () => (
+	req := fetch('/indexes/index.json')
+	json := bind(req, 'then')(resp => bind(resp, 'json')())
+	bind(json, 'then')(index => render(State.index := index))
 )
 
 ` ui components `
@@ -172,8 +158,8 @@ SearchResults := () => h('div', ['search-results'], [
 Sidebar := () => h('div', ['sidebar'], [
 	SearchBox()
 	h('div', ['sidebar-stats'], [
-		State.index :: {
-			() -> 'loading index...'
+		State.docs = () | State.index = () :: {
+			true -> 'loading index...'
 			_ -> h('div', ['sidebar-result-stats'], [
 				f('{{ 0 }} results ({{ 1 }}ms)', [len(State.results), State.searchElapsedMs])
 			])
@@ -281,7 +267,7 @@ bind(document.body, 'addEventListener')('keydown', evt => evt.key :: {
 	)
 })
 
-each(Modules, fetchModuleDocs)
-
+fetchDocs()
+fetchIndex()
 render()
 

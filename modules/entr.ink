@@ -46,7 +46,7 @@ getDocs := withDocs => readFile(EntrFilePath, file => file :: {
 		each(contentLines, (line, i) => hasPrefix?(line, '#') :: {
 			true -> (
 				docs.len(docs) := {
-					id: 'entr/' + string(i)
+					id: 'entr' + string(i)
 					tokens: tokenize(S.heading + S.noteGroup)
 					content: replace(S.noteGroup, ' // ', Newline)
 					title: S.heading
@@ -56,7 +56,7 @@ getDocs := withDocs => readFile(EntrFilePath, file => file :: {
 			)
 			_ -> S.heading :: {
 				'' -> docs.len(docs) := {
-					id: 'entr/' + string(i)
+					id: 'entr' + string(i)
 					tokens: tokenize(line)
 					content: trimPrefix(replace(line, ' // ', Newline), '- ')
 				}

@@ -66,11 +66,35 @@ each(keys(Modules), moduleKey => (
 	module := Modules.(moduleKey)
 	getDocs := module.getDocs
 	lazyGetDocs(moduleKey, getDocs, docs => (
-		each(docs, doc => Docs.(doc.id) := doc)
+		each(docs, doc => Docs.(doc.id) := (doc.module := moduleKey))
 
 		ModuleState.loadedModules := ModuleState.loadedModules + 1
 		ModuleState.loadedModules :: {
-			len(Modules) -> main(indexDocs(Docs))
+			len(Modules) -> (
+				next := () => (
+					log('[main] indexing docs...')
+					Index := indexDocs(Docs)
+
+					log('[main] persisting index...')
+					writeFile('./static/indexes/index.json', serJSON(Index), res => res :: {
+						true -> main(Index)
+						_ -> (
+							log('[main] failed to persist index!')
+							main(Index)
+						)
+					})
+				)
+
+				log('[main] persisting docs...')
+				writeFile('./static/indexes/docs.json', serJSON(Docs), res => res :: {
+					true -> next()
+					_ -> (
+						log('[main] failed to persist docs!')
+						next()
+					)
+				})
+
+			)
 		}
 	))
 ))

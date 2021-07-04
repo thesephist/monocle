@@ -60,7 +60,7 @@ getDocs := withDocs => readFile(IdeaflowExportPath, file => file :: {
 			})
 
 			{
-				id: 'ideaflow/' + string(i)
+				id: 'if' + string(i)
 				tokens: tokenize(note)
 				content: content
 				title: title
