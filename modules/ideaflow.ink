@@ -1,11 +1,11 @@
 ` Module "ideaflow" indexes notes from my Ideaflow thoughtstream. Note that
-Ideaflow notes have ontological graph-like properties that Bastion cannot index
+Ideaflow notes have ontological graph-like properties that Monocle cannot index
 faithfully, so we simply index the textual serialized representation.
 
 The serialized thoughtstream can be obtained with the code
 
 const notes = this.noteRepository.getAll();
-(window as any).bastionExport = JSON.stringify(
+(window as any).monocleExport = JSON.stringify(
   notes.map((note) => {
 	const pmNode = noteToProsemirrorNode(note);
 	const serialized = clipboardTextSerializer(pmNode.slice(0));

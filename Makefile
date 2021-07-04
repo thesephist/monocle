@@ -13,13 +13,13 @@ build-libs:
 		vendor/quicksort.ink \
 		> static/ink/lib.js
 
-build-bastion:
+build-monocle:
 	september translate \
 		lib/tokenizer.ink \
 		lib/indexer.ink \
 		lib/ranker.ink \
 		lib/searcher.ink \
-		> static/ink/bastion.js
+		> static/ink/monocle.js
 
 # build app clients
 build:
@@ -33,13 +33,13 @@ build:
 	cat \
 		static/ink/vendor.js \
 		static/ink/lib.js \
-		static/ink/bastion.js \
+		static/ink/monocle.js \
 		static/ink/common.js \
 		> static/ink/bundle.js
 b: build
 
 # run all builds from scratch
-build-all: build-libs build-bastion build
+build-all: build-libs build-monocle build
 
 # build whenever Ink sources change
 watch:
