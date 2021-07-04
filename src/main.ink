@@ -28,8 +28,10 @@ findDocs := searcher.findDocs
 Modules := {
 	www: load('../modules/www')
 	entr: load('../modules/entr')
+	mira: load('../modules/mira')
 	lifelog: load('../modules/lifelog')
 	ligature: load('../modules/ligature')
+	ideaflow: load('../modules/ideaflow')
 }
 ModuleState := {
 	loadedModules: 0

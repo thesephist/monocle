@@ -14,6 +14,7 @@ append := std.append
 readFile := std.readFile
 split := str.split
 trim := str.trim
+replace := str.replace
 hasPrefix? := str.hasPrefix?
 trimPrefix := str.trimPrefix
 
@@ -38,14 +39,16 @@ getDocs := withDocs => readFile(EntrFilePath, file => file :: {
 
 		lines := split(file, Newline)
 		nonEmptyLines := filter(lines, line => len(trim(line, ' ')) > 0)
+		` we ignore the title because the title is a false "heading" `
+		contentLines := slice(nonEmptyLines, 1, len(nonEmptyLines))
 
 		docs := []
-		each(nonEmptyLines, (line, i) => hasPrefix?(line, '#') :: {
+		each(contentLines, (line, i) => hasPrefix?(line, '#') :: {
 			true -> (
 				docs.len(docs) := {
 					id: 'entr/' + string(i)
 					tokens: tokenize(S.heading + S.noteGroup)
-					content: S.noteGroup
+					content: replace(S.noteGroup, ' // ', Newline)
 					title: S.heading
 				}
 				S.heading := trimPrefix(trimPrefix(line, '#'), ' ')
@@ -55,7 +58,7 @@ getDocs := withDocs => readFile(EntrFilePath, file => file :: {
 				'' -> docs.len(docs) := {
 					id: 'entr/' + string(i)
 					tokens: tokenize(line)
-					content: line
+					content: replace(line, ' // ', Newline)
 				}
 				_ -> S.noteGroup := S.noteGroup + Newline + line
 			}

@@ -12,8 +12,10 @@ LoadedModules := []
 Modules := [
 	'www'
 	'entr'
+	'mira'
 	'lifelog'
 	'ligature'
+	'ideaflow'
 ]
 
 ` utilities `
@@ -157,7 +159,7 @@ Sidebar := () => h('div', ['sidebar'], [
 		State.index :: {
 			() -> 'loading index...'
 			_ -> h('div', ['sidebar-result-stats'], [
-				f('{{ 0 }} results in {{ 1 }}ms', [len(State.results), State.searchElapsedMs])
+				f('{{ 0 }} results ({{ 1 }}ms)', [len(State.results), State.searchElapsedMs])
 			])
 		}
 	])
