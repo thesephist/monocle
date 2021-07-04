@@ -50,7 +50,7 @@ getDocs := withDocs => dir(ContentDir, evt => evt.type :: {
 						front matter. `
 						title: slice(
 							post.content
-							index(post.content, '"')
+							index(post.content, '"') + 1
 							index(post.content, 'date: ') - 2
 						)
 					}

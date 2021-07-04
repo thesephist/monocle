@@ -14,6 +14,8 @@ append := std.append
 readFile := std.readFile
 split := str.split
 trim := str.trim
+hasPrefix? := str.hasPrefix?
+trimPrefix := str.trimPrefix
 
 tokenizer := load('../lib/tokenizer')
 tokenize := tokenizer.tokenize
@@ -29,12 +31,21 @@ getDocs := withDocs => readFile(EntrFilePath, file => file :: {
 		[]
 	)
 	_ -> (
+		S := {
+			heading: ''
+		}
+
 		lines := split(file, Newline)
 		nonEmptyLines := filter(lines, line => len(trim(line, ' ')) > 0)
-		docs := map(nonEmptyLines, (line, i) => {
-			id: 'entr/' + string(i)
-			tokens: tokenize(line)
-			content: line
+
+		docs := []
+		each(nonEmptyLines, (line, i) => hasPrefix?(line, '#') :: {
+			true -> S.heading := trimPrefix(trimPrefix(line, '#'), ' ')
+			_ -> docs.len(docs) := {
+				id: 'entr/' + string(i)
+				tokens: tokenize(S.heading + line)
+				content: S.heading + Newline + line
+			}
 		})
 		withDocs(docs)
 	)

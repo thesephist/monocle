@@ -38,7 +38,7 @@ LifeLogFileNames := [
 	'LifeLog-2021.md'
 ]
 
-entryHeader? := line => dateParts := split(slice(line, 0, 10), '-') :: {
+entryHeader? := line => dateParts := split(split(slice(line, 0, 10), ':').0, '-') :: {
 	[_, _, _] -> every(map(cat(dateParts, ''), digit?))
 	_ -> false
 }
