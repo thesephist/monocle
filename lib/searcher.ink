@@ -41,7 +41,7 @@ findDocs := (index, docs, query) => (
 
 			matchingDocs := map(matchingDocIDs, id => docs.(id))
 
-			rankDocs(matchingDocs, queryTokens)
+			rankDocs(matchingDocs, queryTokens, len(docs))
 		)
 	}
 )
