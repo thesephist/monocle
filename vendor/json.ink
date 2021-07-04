@@ -34,7 +34,7 @@ ser := c => type(c) :: {
 	'boolean' -> string(c)
 	` do not serialize functions `
 	'function' -> 'null'
-	'composite' -> '{' + cat(map(keys(c), k => '"' + k + '":' + ser(c.(k))), ',') + '}'
+	'composite' -> '{' + cat(map(keys(c), k => '"' + escape(k) + '":' + ser(c.(k))), ',') + '}'
 }
 
 ` is this character a numeral digit or .? `

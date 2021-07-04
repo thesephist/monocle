@@ -7,10 +7,11 @@ f := std.format
 ` constants `
 
 Newline := char(10)
-MaxResultPadChars := 140 ` tweet size `
+MaxPreviewChars := 500
 
 LoadedModules := []
 Modules := [
+	'www'
 	'entr'
 	'lifelog'
 	'ligature'
@@ -28,15 +29,17 @@ escapeHTML := s => (
 ` TODO: make correct `
 escapeRegExp := s => s
 
-applyHighlights := (s, query) => (
-	s := escapeHTML(s)
+` TODO: explain why this is needed `
+fastSlice := (s, start, end) => bind(str(s), 'substring')(start, end)
+
+applyHighlights := query => (
 	queryTokens := keys(tokenize(State.query))
 	replacementRegExpStr := '(^|\\W)(' + cat(escapeRegExp(queryTokens), '|') + ')'
 	replacementRegExp := jsnew(RegExp, [str(replacementRegExpStr), str('ig')])
 
 	` calling out to JavaScript's native String.prototype.replace so we
 	can run a replace with a native RegExp. `
-	bind(str(s), 'replaceAll')(
+	s => bind(str(escapeHTML(s)), 'replaceAll')(
 		replacementRegExp
 		'$1<span class="search-highlight">$2</span>'
 	)
@@ -49,7 +52,9 @@ State := {
 	docs: {}
 	index: ()
 	results: []
+	searchElapsedMs: 0
 	selectedIdx: 0
+	showPreview: false
 }
 
 fetchModuleDocs := moduleKey => (
@@ -90,7 +95,7 @@ SearchBox := () => h('div', ['search-box'], [
 	)
 ])
 
-SearchResult := (doc, i) => h(
+SearchResult := (doc, i, highlighter) => hae(
 	'li'
 	[
 		'search-result'
@@ -99,40 +104,46 @@ SearchResult := (doc, i) => h(
 			_ -> ''
 		}
 	]
-	[
-		(
-			container := bind(document, 'createElement')('div')
-			container.className := 'search-result-content'
-			container.onclick := evt => render(State.selectedIdx := i)
-			container.innerHTML := (
-				content := (MaxResultPadChars * 2 > doc.content :: {
-					true -> doc.content
-					` TODO: make it surround the first highlight `
-					_ -> slice(doc.content, 0, MaxResultPadChars * 2)
-				})
-
-				applyHighlights(content, State.query)
-			)
-
-			container
+	{}
+	{
+		click: evt => (
+			State.selectedIdx := i
+			State.showPreview? := true
+			render()
 		)
+	}
+	[
+		` for efficiency, we do not generate a new element every time and
+		instead try to reuse elements on the page if there are any. `
+		existingEl := querySelector('[data-doc-id="' + doc.id + '"]') :: {
+			() -> (
+				container := bind(document, 'createElement')('div')
+				bind(container, 'setAttribute')('data-doc-id', doc.id)
+				container.className := 'search-result-content'
+				container.innerHTML := highlighter(fastSlice(doc.content, 0, MaxPreviewChars))
+				container
+			)
+			_ -> existingEl
+		}
 	]
 )
 
 SearchResults := () => h('div', ['search-results'], [
 	h('ol', ['search-results-list'], (
-		map(State.results, (result, i) => SearchResult(result, i))
+		highlighter := applyHighlights(State.query)
+		map(State.results, (result, i) => SearchResult(result, i, highlighter))
 	))
 ])
 
 Sidebar := () => h('div', ['sidebar'], [
 	SearchBox()
-	State.index :: {
-		() -> 'loading index...'
-		_ -> ()
-	}
-	h('div', ['sidebar-result-stats'], [
-		f('{{ 0 }} results in {{ 1 }}ms', [len(State.results), 100])
+	h('div', ['sidebar-stats'], [
+		State.index :: {
+			() -> 'loading index...'
+			_ -> h('div', ['sidebar-result-stats'], [
+				f('{{ 0 }} results in {{ 1 }}ms', [len(State.results), State.searchElapsedMs])
+			])
+		}
 	])
 	SearchResults()
 ])
@@ -142,20 +153,23 @@ DocPreview := () => h('div', ['doc-preview'], [
 		() -> h('div', ['doc-preview-empty'], [
 			'Select a result to view it here.'
 		])
-		_ -> (
-			container := bind(document, 'createElement')('div')
-			container.className := 'doc-preview-content'
-			container.innerHTML := applyHighlights(selectedDoc.content, State.query)
-			container
-		)
+		_ -> h('div', ['doc-preview-content'], (
+			highlighter := applyHighlights(State.query)
+			map(split(selectedDoc.content, Newline), para => (
+				p := bind(document, 'createElement')('p')
+				p.innerHTML := highlighter(para)
+				p
+			))
+		))
 	}
 ])
 
 ` state updaters `
 
 updateResults := () => (
-	` TODO: search algorithm `
+	start := time()
 	State.results := findDocs(State.index, State.docs, State.query)
+	State.searchElapsedMs := floor((time() - start) * 1000)
 	State.selectedIdx := 0
 	render()
 )
@@ -171,7 +185,9 @@ render := () => update(h(
 	['app']
 	[
 		Sidebar()
-		DocPreview()
+		State.showPreview? :: {
+			true -> DocPreview()
+		}
 	]
 ))
 
@@ -202,6 +218,8 @@ bind(document.body, 'addEventListener')('keydown', evt => evt.key :: {
 	}
 	'ArrowUp' -> selectUp(evt)
 	'ArrowDown' -> selectDown(evt)
+	'Enter' -> render(State.showPreview? := true)
+	'Escape' -> render(State.showPreview? := false)
 	'/' -> searchBox := querySelector('.search-box-input') :: {
 		() -> ()
 		_ -> (

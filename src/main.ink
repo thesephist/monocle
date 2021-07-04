@@ -26,6 +26,7 @@ findDocs := searcher.findDocs
 
 ` modules `
 Modules := {
+	www: load('../modules/www')
 	entr: load('../modules/entr')
 	lifelog: load('../modules/lifelog')
 	ligature: load('../modules/ligature')

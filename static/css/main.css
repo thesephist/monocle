@@ -12,6 +12,7 @@ body {
 
     --sans: 'IBM Plex Sans', sans-serif;
     --mono: 'IBM Plex Mono', monospace;
+	--sidebar-width: 450px;
 
     /* color variables taken from Merlot */
     --primary-bg: #f9fafb;
@@ -123,57 +124,133 @@ textarea {
 }
 
 .sidebar {
-    width: 300px;
-    flex-grow: 0;
-    flex-shrink: 0;
+	width: 0;
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
-    padding: 12px;
     box-sizing: border-box;
 }
 
+.search-box,
+.search-results,
+.doc-preview-content {
+	background: var(--primary-bg);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
+	margin: 12px;
+    border-radius: 8px;
+}
+
+.search-box-input {
+    padding: 8px 12px;
+	border: 0;
+	background: transparent;
+	height: 100%;
+	width: 100%;
+	box-sizing: border-box;
+}
+
 .search-results {
-	height: 0;
-	flex-grow: 1;
     overflow-y: auto;
 }
 
 .search-results ol.search-results-list {
 	padding-left: 0;
+	margin: 0;
 }
 
 li.search-result {
 	list-style: none;
-	background: var(--primary-bg);
-    margin-bottom: 8px;
-    border-radius: 6px;
-    box-shadow: 0 2px 6px rgb(0 0 0 / 20%);
-    padding: 4px 6px;
-	cursor: pointer;
-}
-
-.search-result:hover {
-	background: var(--hover-bg);
+    background: var(--primary-bg);
+    cursor: pointer;
+    font-weight: normal;
+    padding: 5px 12px;
+    border-bottom: 1px solid var(--active-bg);
 }
 
 .search-result.selected {
 	background: var(--active-bg);
 }
 
+.search-result:hover {
+	background: var(--hover-bg);
+}
+
 .search-result .search-result-content {
     overflow: hidden;
     line-height: 1.4em;
     font-size: 14px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 .doc-preview {
-	width: 0;
-	flex-grow: 1;
+	width: calc(100% - var(--sidebar-width));
+    max-width: 800px;
 	overflow-y: auto;
 }
+
+/* Merlot Markdown output styles */
 
 .doc-preview-content {
 	white-space: pre-wrap;
 	background: var(--primary-bg);
+	margin: 12px 12px 32px 12px;
+	padding: 1em;
 }
+
+.doc-preview-content h1:first-child,
+.doc-preview-content h2:first-child,
+.doc-preview-content p:first-child {
+	margin-top: 0;
+}
+
+.doc-preview-content p,
+.doc-preview-content li {
+    line-height: 1.5em;
+}
+
+.doc-preview-content strike {
+    color: var(--secondary-text);
+}
+
+.doc-preview-content img {
+    max-width: 100%;
+}
+
+.doc-preview-content a {
+    color: var(--primary-text);
+    text-decoration: underline;
+}
+
+.doc-preview-content pre,
+.doc-preview-content code {
+    background: var(--hover-bg);
+    font-size: 1em;
+    font-family: 'IBM Plex Mono', 'Menlo', 'Monaco', monospace;
+}
+
+.doc-preview-content pre {
+    border-radius: 4px;
+    box-sizing: border-box;
+    padding: 12px 8px;
+    overflow-x: auto;
+}
+
+.doc-preview-content code {
+    padding: 1px 5px;
+    border-radius: 4px;
+}
+
+.doc-preview-content pre code {
+    padding: 0;
+}
+
+.doc-preview-content blockquote {
+    margin: 0;
+    border-left: 4px solid var(--active-bg);
+    padding-left: 1em;
+    display: block;
+}
+
 
