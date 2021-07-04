@@ -27,27 +27,28 @@ each(Stopwords, word => StopwordMap.(word) := true)
 notStopword? := w => StopwordMap.(w) = ()
 
 ` TODO: could be hand-unrolled into a single match expression `
-Puncts := '.,:;?!@#%&*()[]{}\|/<>~"-_+='
+Puncts := '.,:;?!#%&*()[]{}\|/<>~"-_+='
 punct? := c => (sub := i => Puncts.(i) :: {
 	() -> false
 	c -> true
 	_ -> sub(i + 1)
 })(0)
+control? := c => point(c) < 32
 
 ` Replaces punctuations with whitespace in the given string. Note that this
 function mutates its argument, and returns (). `
-removePunct := s => (sub := i => (
-	c := s.(i) :: {
-		() -> s
-		_ -> punct?(s.(i)) :: {
-			true -> (
-				s.(i) := ' '
-				sub(i + 1)
-			)
-			_ -> sub(i + 1)
+removePunct := s => (sub := i => c := s.(i) :: {
+	() -> s
+	_ -> (
+		punct?(c) :: {
+			true -> s.(i) := ' '
+			_ -> control?(c) :: {
+				true -> s.(i) := ' '
+			}
 		}
-	}
-))(0)
+		sub(i + 1)
+	)
+})(0)
 
 whitespace? := c => point(c) :: {
 	9 -> true ` tab `

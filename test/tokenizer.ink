@@ -46,6 +46,11 @@ run := (m, t) => (
 				crazy: 1
 			}
 		)
+		t(
+			'Skips control characters'
+			tokenize('First second' + char(27) + ' ' + char(30) + ' third')
+			{first: 1, second: 1, third: 1}
+		)
 	)
 )
 

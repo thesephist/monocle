@@ -55,6 +55,7 @@ State := {
 	searchElapsedMs: 0
 	selectedIdx: 0
 	showPreview: false
+	theme: 'light'
 }
 
 fetchModuleDocs := moduleKey => (
@@ -174,6 +175,9 @@ updateResults := () => (
 	State.results := findDocs(State.index, State.docs, State.query)
 	State.searchElapsedMs := floor((time() - start) * 1000)
 	State.selectedIdx := 0
+	trim(State.query, ' ') :: {
+		'' -> State.showPreview? := false
+	}
 	render()
 )
 
@@ -185,7 +189,9 @@ update := r.update
 
 render := () => update(h(
 	'div'
-	['app']
+	[
+		'app'
+	]
 	[
 		Sidebar()
 		State.showPreview? :: {
@@ -230,6 +236,15 @@ bind(document.body, 'addEventListener')('keydown', evt => evt.key :: {
 			bind(searchBox, 'focus')()
 		)
 	}
+	'`' -> (
+		bind(evt, 'preventDefault')()
+		State.theme := (State.theme :: {
+			'dark' -> 'light'
+			_ -> 'dark'
+		})
+		bind(document.body.classList, 'toggle')('dark', State.theme = 'dark')
+		render()
+	)
 })
 
 each(Modules, fetchModuleDocs)
