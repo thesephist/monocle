@@ -33,6 +33,11 @@ escapeRegExp := s => s
 ` TODO: explain why this is needed `
 fastSlice := (s, start, end) => bind(str(s), 'substring')(start, end)
 
+clippedResultsCount := () => (
+	ResultHeight := 32 ` NOTE: heuristic `
+	floor((window.innerHeight - 96) / ResultHeight)
+)
+
 applyHighlights := query => (
 	queryTokens := keys(tokenize(State.query))
 	replacementRegExpStr := '(^|\\W)(' + cat(escapeRegExp(queryTokens), '|') + ')'
@@ -55,7 +60,8 @@ State := {
 	results: []
 	searchElapsedMs: 0
 	selectedIdx: 0
-	showPreview: false
+	showPreview?: false
+	showAllResults?: false
 	theme: 'light'
 }
 
@@ -67,6 +73,7 @@ fetchModuleDocs := moduleKey => (
 		each(docs, doc => State.docs.(doc.id) := (doc.module := moduleKey))
 		len(LoadedModules) :: {
 			len(Modules) -> (
+				start := time()
 				State.index := indexDocs(State.docs)
 				render()
 			)
@@ -116,8 +123,13 @@ SearchResult := (doc, i, highlighter, maxPreviewChars) => hae(
 	}
 	[
 		h('span', ['search-result-module'], [doc.module])
-		h('span', ['search-result-title'], [doc.title])
-		' · '
+		doc.title :: {
+			() -> ()
+			_ -> h('span', ['search-result-title'], [
+				doc.title
+				' · '
+			])
+		}
 		` for efficiency, we do not generate a new element every time and
 		instead try to reuse elements on the page if there are any. `
 		existingEl := querySelector('[data-doc-id="' + doc.id + '"]') :: {
@@ -144,7 +156,11 @@ SearchResults := () => h('div', ['search-results'], [
 		screen width, and seems to work well enough.`
 		maxPreviewChars := floor(window.innerWidth / 6)
 		highlighter := applyHighlights(State.query)
-		map(State.results, (result, i) => SearchResult(
+		results := (State.showAllResults? :: {
+			true -> State.results
+			_ -> slice(State.results, 0, clippedResultsCount())
+		})
+		map(results, (result, i) => SearchResult(
 			result
 			i
 			highlighter
@@ -173,7 +189,11 @@ DocPreview := () => h('div', ['doc-preview'], [
 		])
 		_ -> h('div', ['doc-preview-content'], (
 			highlighter := applyHighlights(State.query)
-			map(split(selectedDoc.title + Newline + selectedDoc.content, Newline), para => (
+			content := (selectedDoc.title :: {
+				() -> selectedDoc.content
+				_ -> selectedDoc.title + Newline + selectedDoc.content
+			})
+			map(split(content, Newline), para => (
 				p := bind(document, 'createElement')('p')
 				p.innerHTML := highlighter(para)
 				p

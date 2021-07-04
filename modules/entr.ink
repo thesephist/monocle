@@ -58,7 +58,7 @@ getDocs := withDocs => readFile(EntrFilePath, file => file :: {
 				'' -> docs.len(docs) := {
 					id: 'entr/' + string(i)
 					tokens: tokenize(line)
-					content: replace(line, ' // ', Newline)
+					content: trimPrefix(replace(line, ' // ', Newline), '- ')
 				}
 				_ -> S.noteGroup := S.noteGroup + Newline + line
 			}
