@@ -1,0 +1,74 @@
+` Module "www" indexes every post from my blog thesephist.com. `
+
+std := load('../vendor/std')
+str := load('../vendor/str')
+
+log := std.log
+slice := std.slice
+map := std.map
+each := std.each
+filter := std.filter
+append := std.append
+flatten := std.flatten
+readFile := std.readFile
+split := str.split
+trim := str.trim
+
+tokenizer := load('../lib/tokenizer')
+tokenize := tokenizer.tokenize
+tokenFrequencyMap := tokenizer.tokenFrequencyMap
+
+Newline := char(10)
+
+ContentDir := env().HOME + '/src/www/content/posts'
+
+getDocs := withDocs => dir(ContentDir, evt => evt.type :: {
+	'error' -> (
+		log('[www] could not read the posts directory')
+		withDocs([])
+	)
+	'data' -> (
+		entries := evt.data
+
+		` Post : [
+			name: string
+			content: string
+		]`
+		posts := []
+
+		ifAllRead := () => len(posts) :: {
+			len(entries) -> (
+				docs := map(posts, post => (
+					log('[www] tokenizing post ' + post.name)
+					{
+						id: 'www/' + post.name
+						tokens: tokenize(post.content)
+						content: post.content
+					}
+				))
+				withDocs(docs)
+			)
+		}
+
+		each(entries, entry => (
+			readFile(ContentDir + '/' + entry.name, file => file :: {
+				() -> (
+					log('[www] could not read post' + entry.name)
+					posts.len(posts) := {
+						name: entry.name
+						content: ''
+					}
+					ifAllRead()
+				)
+				_ -> (
+					posts.len(posts) := {
+						name: entry.name
+						content: file
+					}
+					ifAllRead()
+				)
+			})
+		))
+	)
+})
+
