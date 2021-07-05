@@ -20,33 +20,38 @@ intersectionSet := (a, b) => reduce(keys(a), (intersection, it) => b.(it) :: {
 	_ -> intersection
 }, {})
 
-findDocs := (index, docs, query) => (
-	queryTokens := keys(tokenize(query))
-
-	queryTokens :: {
-		[] -> []
-		_ -> (
-			docMatches := map(
-				map(queryTokens, token => index.(token))
-				docIDs => docIDs :: {
-					() -> []
-					_ -> docIDs
-				}
-			)
-
-			` we perform this operation by accumulating on a set of docIDs
-			rather than a list, to avoid quadratic is-element checks. `
-			docMatchesAsMaps := map(docMatches, listToSet)
-			matchingDocIDs := keys(reduce(
-				slice(docMatchesAsMaps, 1, len(docMatchesAsMaps))
-				intersectionSet
-				docMatchesAsMaps.0
+findDocs := (index, docs, query) => queryTokens := keys(tokenize(query)) :: {
+	[] -> []
+	_ -> (
+		docMatches := map(
+			map(queryTokens, token => (
+				variations := variationsOfWord(token)
+				log(stringList(variations))
+				variationDocSet := {}
+				each(variations, var => docIDs := index.(var) :: {
+					() -> ()
+					_ -> each(docIDs, id => variationDocSet.(id) := true)
+				})
+				keys(variationDocSet)
 			))
-
-			matchingDocs := map(matchingDocIDs, id => docs.(id))
-
-			rankDocs(matchingDocs, queryTokens, len(docs))
+			docIDs => docIDs :: {
+				() -> []
+				_ -> docIDs
+			}
 		)
-	}
-)
+
+		` we perform this operation by accumulating on a set of docIDs
+		rather than a list, to avoid quadratic is-element checks. `
+		docMatchesAsMaps := map(docMatches, listToSet)
+		matchingDocIDs := keys(reduce(
+			slice(docMatchesAsMaps, 1, len(docMatchesAsMaps))
+			intersectionSet
+			docMatchesAsMaps.0
+		))
+
+		matchingDocs := map(matchingDocIDs, id => docs.(id))
+
+		rankDocs(matchingDocs, tokenizeAndVary(query), len(docs))
+	)
+}
 

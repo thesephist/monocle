@@ -5,6 +5,7 @@ std := load('../vendor/std')
 str := load('../vendor/str')
 
 log := std.log
+f := std.format
 slice := std.slice
 map := std.map
 each := std.each
@@ -53,6 +54,7 @@ getDocs := withDocs => dir(LigatureDir, evt => evt.type :: {
 						tokens: tokenize(content)
 						content: slice(content, firstNewline, len(content))
 						title: slice(content, 0, firstNewline)
+						href: 'https://ligature.thesephist.com/note/' + slice(note.name, 0, len(note.name) - 3)
 					}
 				))
 				withDocs(docs)

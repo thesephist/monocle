@@ -18,6 +18,7 @@ build-monocle:
 		lib/tokenizer.ink \
 		lib/indexer.ink \
 		lib/ranker.ink \
+		lib/stemmer.ink \
 		lib/searcher.ink \
 		> static/ink/monocle.js
 

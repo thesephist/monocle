@@ -2,14 +2,14 @@
 Ideaflow notes have ontological graph-like properties that Monocle cannot index
 faithfully, so we simply index the textual serialized representation.
 
-The serialized thoughtstream can be obtained with the code
+The serialized thoughtstream can be obtained with the code:
 
 const notes = this.noteRepository.getAll();
-(window as any).monocleExport = JSON.stringify(
+JSON.stringify(
   notes.map((note) => {
-	const pmNode = noteToProsemirrorNode(note);
-	const serialized = clipboardTextSerializer(pmNode.slice(0));
-	return serialized;
+    const pmNode = noteToProsemirrorNode(note);
+    const serialized = clipboardTextSerializer(pmNode.slice(0));
+    return {id: note.id, content: serialized};
   }),
 );
 `
@@ -39,7 +39,7 @@ tokenFrequencyMap := tokenizer.tokenFrequencyMap
 
 Newline := char(10)
 
-IdeaflowExportPath := '/tmp/ideaflow.txt'
+IdeaflowExportPath := '/tmp/ideaflow.json'
 
 getDocs := withDocs => readFile(IdeaflowExportPath, file => file :: {
 	() -> (
@@ -49,21 +49,22 @@ getDocs := withDocs => readFile(IdeaflowExportPath, file => file :: {
 	_ -> (
 		notes := deJSON(file)
 		docs := map(notes, (note, i) => (
-			lines := split(note, Newline)
+			lines := split(note.content, Newline)
 			title := (len(lines) > 1 :: {
 				true -> lines.0
 				_ -> ()
 			})
 			content := (len(lines) > 1 :: {
 				true -> cat(slice(lines, 1, len(lines)), Newline)
-				_ -> note
+				_ -> note.content
 			})
 
 			{
 				id: 'if' + string(i)
-				tokens: tokenize(note)
+				tokens: tokenize(note.content)
 				content: content
 				title: title
+				href: 'https://ideaflow.app/?page=1&noteId=' + note.id
 			}
 		))
 		withDocs(docs)

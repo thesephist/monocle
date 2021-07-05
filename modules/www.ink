@@ -4,6 +4,7 @@ std := load('../vendor/std')
 str := load('../vendor/str')
 
 log := std.log
+f := std.format
 slice := std.slice
 map := std.map
 each := std.each
@@ -53,6 +54,9 @@ getDocs := withDocs => dir(ContentDir, evt => evt.type :: {
 							index(post.content, '"') + 1
 							index(post.content, 'date: ') - 2
 						)
+						` link is generated from the name of the Markdown file `
+						href: f('https://thesephist.com/posts/{{ 0 }}/'
+							[slice(post.name, 0, len(post.name) - 3)])
 					}
 				))
 				withDocs(docs)

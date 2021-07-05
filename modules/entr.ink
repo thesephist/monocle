@@ -55,10 +55,16 @@ getDocs := withDocs => readFile(EntrFilePath, file => file :: {
 				S.noteGroup := ''
 			)
 			_ -> S.heading :: {
-				'' -> docs.len(docs) := {
-					id: 'entr' + string(i)
-					tokens: tokenize(line)
-					content: trimPrefix(replace(line, ' // ', Newline), '- ')
+				'' -> hasPrefix?(line, '  ') :: {
+					true -> (
+						lastDoc := docs.(len(docs) - 1)
+						lastDoc.content := lastDoc.content + Newline + line
+					)
+					_ -> docs.len(docs) := {
+						id: 'entr' + string(i)
+						tokens: tokenize(line)
+						content: trimPrefix(replace(line, ' // ', Newline), '- ')
+					}
 				}
 				_ -> S.noteGroup := S.noteGroup + Newline + line
 			}

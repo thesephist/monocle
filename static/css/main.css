@@ -270,9 +270,6 @@ li.search-result {
 	width: 100px;
 }
 
-.search-result .search-result-title {
-}
-
 .search-result .search-result-content {
     overflow: hidden;
     line-height: 1.4em;
@@ -299,22 +296,69 @@ li.search-result {
 	width: calc(100% - var(--sidebar-width));
 	min-width: 320px;
     max-width: 800px;
-	overflow-y: auto;
-	-webkit-overflow-scrolling: auto;
     background: var(--primary-bg);
 	box-shadow: 0 3px 14px -2px rgba(0, 0, 0, .20);
 	position: fixed;
 	top: 0;
 	bottom: 0;
 	right: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.doc-preview .doc-preview-buttons {
+	display: flex;
+	flex-direction: row-reverse;
+	align-items: center;
+	justify-content: flex-start;
+	padding: 1em;
+	flex-grow: 0;
+	flex-shrink: 0;
+}
+
+.doc-preview .button {
+	font-family: system-ui, sans-serif;
+	border: 0;
+	background: var(--hover-bg);
+	border-radius: 6px;
+	padding: 6px 10px;
+	cursor: pointer;
+	margin-left: 8px;
+}
+
+.doc-preview a.button {
+	text-decoration: none;
+}
+
+.doc-preview .button:hover {
+	background: var(--active-bg);
+}
+
+.doc-preview-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	color: var(--secondary-text);
+	font-style: italic;
+	height: 100%;
+}
+
+.doc-preview-title {
+	font-weight: bold;
+	flex-grow: 1;
+	margin: 0;
 }
 
 /* Merlot Markdown output styles */
 
 .doc-preview-content {
+	height: 0;
+	flex-grow: 1;
 	white-space: pre-wrap;
-	margin: 12px 12px 32px 12px;
 	padding: 1em;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: auto;
 }
 
 .doc-preview-content h1:first-child,

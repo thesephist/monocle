@@ -48,8 +48,8 @@ formatNumber := n => (
 )
 
 applyHighlights := query => (
-	queryTokens := keys(tokenize(State.query))
-	replacementRegExpStr := '(^|\\W)(' + cat(escapeRegExp(queryTokens), '|') + ')'
+	queryTokenVariations := tokenizeAndVary(State.query)
+	replacementRegExpStr := '(^|\\W)(' + cat(escapeRegExp(queryTokenVariations), '|') + ')'
 	replacementRegExp := jsnew(RegExp, [str(replacementRegExpStr), str('ig')])
 
 	` calling out to JavaScript's native String.prototype.replace so we
@@ -274,25 +274,47 @@ Sidebar := () => h('div', ['sidebar'], [
 	SearchResults()
 ])
 
-DocPreview := () => h('div', ['doc-preview'], [
-	selectedDoc := State.results.(State.selectedIdx) :: {
-		() -> h('div', ['doc-preview-empty'], [
-			'Select a result to view it here.'
+DocPreview := () => h('div', ['doc-preview'], (
+	selectedDoc := State.results.(State.selectedIdx)
+	[
+		h('div', ['doc-preview-buttons'], [
+			hae('button', ['button', 'doc-preview-close'], {title: 'Close preview'}, {
+				click: evt => render(State.showPreview? := false)
+			}, ['×'])
+			selectedDoc :: {
+				() -> ()
+				_ -> href := selectedDoc.href :: {
+					() -> ()
+					_ -> ha('a', ['button', 'doc-preview-open'], {
+						title: 'Open on new page'
+						href: href
+						target: '_blank'
+					}, ['open →'])
+				}
+			}
+			selectedDoc :: {
+				() -> ()
+				_ -> title := selectedDoc.title :: {
+					() -> ()
+					_ -> h('p', ['doc-preview-title'], [title])
+				}
+			}
 		])
-		_ -> h('div', ['doc-preview-content'], (
-			highlighter := applyHighlights(State.query)
-			content := (selectedDoc.title :: {
-				() -> selectedDoc.content
-				_ -> selectedDoc.title + Newline + selectedDoc.content
-			})
-			map(split(content, Newline), para => (
-				p := bind(document, 'createElement')('p')
-				p.innerHTML := highlighter(para)
-				p
+		selectedDoc :: {
+			() -> h('div', ['doc-preview-empty'], [
+				'Search & pick a result to view it here.'
+			])
+			_ -> h('div', ['doc-preview-content'], (
+				highlighter := applyHighlights(State.query)
+				map(split(selectedDoc.content, Newline), para => (
+					p := bind(document, 'createElement')('p')
+					p.innerHTML := highlighter(para)
+					p
+				))
 			))
-		))
-	}
-])
+		}
+	]
+))
 
 ` state updaters `
 
