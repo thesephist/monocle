@@ -136,6 +136,10 @@ textarea {
     color: var(--secondary-text);
 }
 
+.search-box {
+	position: relative;
+}
+
 .search-box-input {
     padding: 16px 12px;
     border: 0;
@@ -147,6 +151,27 @@ textarea {
 
 .search-box-input:focus {
     outline: 0;
+}
+
+.search-box-clear {
+	position: absolute;
+	top: 50%;
+	right: 12px;
+	padding: 6px 10px;
+	border: 0;
+	border-radius: 4px;
+	cursor: pointer;
+	background: transparent;
+	transform: translate(0, -50%);
+	font-size: 18px;
+}
+
+.search-box-clear:hover {
+	background: var(--hover-bg);
+}
+
+.search-box-clear:active {
+	background: var(--active-bg);
 }
 
 .search-results {

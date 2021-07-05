@@ -124,6 +124,12 @@ SearchBox := () => h('div', ['search-box'], [
 		}
 		[]
 	)
+	State.query :: {
+		'' -> ()
+		_ -> hae('button', ['search-box-clear'], {title: 'Clear search'}, {
+			click: evt => performSearch('')
+		}, ['×'])
+	}
 ])
 
 SearchResult := (doc, i, highlighter, maxPreviewChars) => hae(
