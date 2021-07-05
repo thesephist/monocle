@@ -224,6 +224,8 @@ SearchResults := () => len(State.query) = 0 :: {
 					'taylor swift'
 					'uc berkeley'
 					'new york city'
+					'dorm room fund'
+					'venture capital'
 				]
 				term => hae('button', ['search-results-suggestion'], {}, {
 					click: evt => performSearch(term)
@@ -318,35 +320,38 @@ DocPreview := () => h('div', ['doc-preview'], (
 
 ` state updaters `
 
-performSearch := query => (
-	State.query := query
+performSearch := query => ready?() :: {
+	true -> (
+		State.query := query
 
-	start := time()
-	State.results := findDocs(State.index, State.docs, query)
-	State.searchElapsedMs := floor((time() - start) * 1000)
+		start := time()
+		State.results := findDocs(State.index, State.docs, query)
+		State.searchElapsedMs := floor((time() - start) * 1000)
 
-	State.selectedIdx := 0
-	State.showAllResults? := false
-	trim(query, ' ') :: {
-		'' -> (
-			State.showPreview? := false
+		State.selectedIdx := 0
+		State.showAllResults? := false
+		trim(query, ' ') :: {
+			'' -> (
+				State.showPreview? := false
 
-			url := jsnew(URL, [location.href])
-			bind(url.searchParams, 'delete')('q')
-			bind(history, 'replaceState')((), (), url)
+				url := jsnew(URL, [location.href])
+				bind(url.searchParams, 'delete')('q')
+				bind(history, 'replaceState')((), (), url)
 
-			document.title := 'Monocle'
-		)
-		_ -> (
-			url := jsnew(URL, [location.href])
-			bind(url.searchParams, 'set')('q', trim(query, ' '))
-			bind(history, 'replaceState')((), (), url)
+				document.title := 'Monocle'
+			)
+			_ -> (
+				url := jsnew(URL, [location.href])
+				bind(url.searchParams, 'set')('q', trim(query, ' '))
+				bind(history, 'replaceState')((), (), url)
 
-			document.title := f('"{{ query }}" | Monocle', State)
-		)
-	}
-	render()
-)
+				document.title := f('"{{ query }}" | Monocle', State)
+			)
+		}
+		render()
+	)
+	_ -> render(State.query := query)
+}
 
 ` main application `
 

@@ -29,6 +29,7 @@ Modules := {
 	www: load('../modules/www')
 	entr: load('../modules/entr')
 	mira: load('../modules/mira')
+	tweets: load('../modules/tweets')
 	lifelog: load('../modules/lifelog')
 	ligature: load('../modules/ligature')
 	ideaflow: load('../modules/ideaflow')
