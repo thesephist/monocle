@@ -137,7 +137,7 @@ textarea {
 }
 
 .search-box {
-	position: relative;
+    position: relative;
 }
 
 .search-box-input {
@@ -154,24 +154,24 @@ textarea {
 }
 
 .search-box-clear {
-	position: absolute;
-	top: 50%;
-	right: 12px;
-	padding: 6px 10px;
-	border: 0;
-	border-radius: 4px;
-	cursor: pointer;
-	background: transparent;
-	transform: translate(0, -50%);
-	font-size: 18px;
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    padding: 6px 10px;
+    border: 0;
+    border-radius: 4px;
+    cursor: pointer;
+    background: transparent;
+    transform: translate(0, -50%);
+    font-size: 18px;
 }
 
 .search-box-clear:hover {
-	background: var(--hover-bg);
+    background: var(--hover-bg);
 }
 
 .search-box-clear:active {
-	background: var(--active-bg);
+    background: var(--active-bg);
 }
 
 .search-results {
@@ -334,7 +334,7 @@ li.search-result {
 .doc-preview .doc-preview-buttons {
     display: flex;
     flex-direction: row-reverse;
-    align-items: center;
+    align-items: flex-start;
     justify-content: flex-start;
     padding: 1em;
     flex-grow: 0;
@@ -374,9 +374,7 @@ li.search-result {
     font-weight: bold;
     flex-grow: 1;
     margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin: 5px 0;
 }
 
 /* Merlot Markdown output styles */
@@ -445,12 +443,19 @@ li.search-result {
     display: block;
 }
 
+.desktop {
+    display: none;
+}
+
 @media only screen and (min-width: 540px) {
     .doc-preview {
         top: 12px;
         right: 12px;
         bottom: 12px;
         border-radius: 12px;
+    }
+    .desktop {
+        display: initial;
     }
 }
 

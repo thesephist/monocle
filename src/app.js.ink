@@ -183,11 +183,11 @@ most components, because it is static. `
 KeyboardMap := h('div', ['keyboard-map'], [
 	h('ul', ['keyboard-map-list'], (
 		Keybindings := {
-			'Tab': 'Move down search result'
-			'Shift Tab': 'Move up search result'
+			'Tab': 'Next search result'
+			'Shift Tab': 'Previous search result'
 			'Enter': 'Show preview pane'
 			'Escape': 'Hide preview pane, clear search'
-			'/': 'Focus search field'
+			'/': 'Focus search box'
 			'`': 'Switch light/dark color theme'
 		}
 
@@ -228,14 +228,17 @@ SearchResults := () => len(State.query) = 0 :: {
 					'linus lee'
 					'side project idea'
 					'tools for thought'
+					'incremental note-taking'
 					'taylor swift'
 					'uc berkeley'
 					'new york city'
 					'dorm room fund'
-					'venture capital'
 				]
 				term => hae('button', ['search-results-suggestion'], {}, {
-					click: evt => performSearch(term)
+					click: evt => (
+						performSearch(term)
+						focusSearch()
+					)
 				}, [term])
 			)
 		))
@@ -298,7 +301,7 @@ DocPreview := () => h('div', ['doc-preview'], (
 						title: 'Open on new page'
 						href: href
 						target: '_blank'
-					}, ['open →'])
+					}, [h('span', ['desktop'], ['open ']), '→'])
 				}
 			}
 			selectedDoc :: {
@@ -384,6 +387,11 @@ render := () => update(h(
 	]
 ))
 
+focusSearch := evt => searchBox := querySelector('.search-box-input') :: {
+	() -> ()
+	_ -> bind(searchBox, 'focus')()
+}
+
 selectDown := evt => (
 	bind(evt, 'preventDefault')()
 	State.selectedIdx := (State.selectedIdx + 1) % len(State.results)
@@ -414,13 +422,16 @@ bind(document.body, 'addEventListener')('keydown', evt => evt.key :: {
 	'Enter' -> render(State.showPreview? := true)
 	'Escape' -> State.showPreview? :: {
 		true -> render(State.showPreview? := false)
-		_ -> performSearch('')
+		_ -> (
+			performSearch('')
+			focusSearch()
+		)
 	}
-	'/' -> searchBox := querySelector('.search-box-input') :: {
-		() -> ()
+	'/' -> lower(evt.target.tagName) :: {
+		'input' -> ()
 		_ -> (
 			bind(evt, 'preventDefault')()
-			bind(searchBox, 'focus')()
+			focusSearch()
 		)
 	}
 	'`' -> (
