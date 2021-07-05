@@ -46,7 +46,8 @@ index:
 	ink src/main.ink
 	# remove control characters that sneak into content. These are filtered out
 	# in the index but not in doc sources, and trips up JSON parsers.
-	tr -d "[:cntrl:]" < static/indexes/docs.json > static/indexes/docs.json
+	tr -d '[:cntrl:]' < static/indexes/docs.json > /tmp/docs.json
+	mv /tmp/docs.json static/indexes/docs.json
 
 # build whenever Ink sources change
 watch:

@@ -99,7 +99,7 @@ each(keys(Modules), moduleKey => (
 	))
 ))
 
-main := index => (sub := () => (
+repl := index => (sub := () => (
 	out('> ')
 	scan(line => (
 		start := time()
@@ -114,4 +114,6 @@ main := index => (sub := () => (
 		sub()
 	))
 ))()
+
+main := () => log('done.')
 

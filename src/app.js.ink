@@ -82,7 +82,7 @@ fetchDocs := () => (
 	bind(json, 'then')(docs => (
 		State.docs := docs
 		ready?() :: {
-			true -> performSearch()
+			true -> performSearch(State.query)
 			_ -> render()
 		}
 	))
@@ -94,13 +94,18 @@ fetchIndex := () => (
 	bind(json, 'then')(index => (
 		State.index := index
 		ready?() :: {
-			true -> performSearch()
+			true -> performSearch(State.query)
 			_ -> render()
 		}
 	))
 )
 
 ` ui components `
+
+Link := (text, href) => ha('a', [], {
+	href: href
+	target: '_blank'
+}, [text])
 
 SearchBox := () => h('div', ['search-box'], [
 	hae(
@@ -109,16 +114,13 @@ SearchBox := () => h('div', ['search-box'], [
 		{
 			value: State.query
 			placeholder: State.docs :: {
-				() -> 'Search...'
-				_ -> 'Search ' + formatNumber(len(State.docs)) + ' docs'
+				() -> 'Type to search...'
+				_ -> 'Type to search ' + formatNumber(len(State.docs)) + ' docs'
 			}
 			autofocus: true
 		}
 		{
-			input: evt => (
-				State.query := evt.target.value
-				performSearch()
-			)
+			input: evt => performSearch(evt.target.value)
 		}
 		[]
 	)
@@ -170,30 +172,94 @@ SearchResult := (doc, i, highlighter, maxPreviewChars) => hae(
 	]
 )
 
-SearchResults := () => h('div', ['search-results'], [
-	h('ol', ['search-results-list'], (
-		` NOTE: this is an arbitrary heuristic that tries to scale preview size with
-		screen width, and seems to work well enough.`
-		maxPreviewChars := floor(window.innerWidth / 6)
-		highlighter := applyHighlights(State.query)
-		results := (State.showAllResults? :: {
-			true -> State.results
-			_ -> slice(State.results, 0, clippedResultsCount())
-		})
-		map(results, (result, i) => SearchResult(
-			result
-			i
-			highlighter
-			maxPreviewChars
-		))
+` Note that KeyboardMap is a constant, not a function like
+most components, because it is static. `
+KeyboardMap := h('div', ['keyboard-map'], [
+	h('ul', ['keyboard-map-list'], (
+		Keybindings := {
+			'Tab': 'Move down search result'
+			'Shift Tab': 'Move up search result'
+			'Enter': 'Show preview pane'
+			'Escape': 'Hide preview pane, clear search'
+			'/': 'Focus search field'
+			'`': 'Switch light/dark color theme'
+		}
+
+		map(keys(Keybindings), keybinding => h('li', ['keyboard-map-item'], [
+			h('div', ['keybinding-keys'], map(split(keybinding, ' '), key => h('kbd', [], [key])))
+			h('div', ['keybinding-detail'], [Keybindings.(keybinding)])
+		]))
 	))
-	~(State.showAllResults?) & len(State.results) > clippedResultsCount() :: {
-		true -> hae('button', ['search-results-show-all'], {}, {
-			click: () => render(State.showAllResults? := true)
-		}, ['Show more ...'])
-	}
-	h('div', ['search-results-bottom-padding'], [])
 ])
+
+` Note that About is constant, rather than a function like most components,
+because it is static. `
+About := h('div', ['about'], [
+	h('p', [], [
+		'Monocle is a universal, personal search engine by '
+		Link('Linus', 'https://thesephist.com')
+		'. It\'s built with '
+		Link('Ink', 'https://dotink.co')
+		' and '
+		Link('Torus', 'https://github.com/thesephist/torus')
+		', and open source on '
+		Link('GitHub', 'https://github.com/thesephist/monocle')
+		'.'
+	])
+	h('p', [], [
+		'Monocle is powered by a full-text indexing and search engine written in
+		pure Ink, and searches across Linus\'s blogs and private note archives,
+		contacts, tweets, and over a decade of journals.'
+	])
+])
+
+SearchResults := () => len(State.query) = 0 :: {
+	true -> h('div', ['search-results', 'search-results-empty'], [
+		h('h2', ['empty-state-heading'], ['Suggestions'])
+		h('div', ['search-results-suggestions'], (
+			map(
+				[
+					'linus lee'
+					'side project idea'
+					'taylor swift'
+					'uc berkeley'
+					'new york city'
+				]
+				term => hae('button', ['search-results-suggestion'], {}, {
+					click: evt => performSearch(term)
+				}, [term])
+			)
+		))
+		h('h2', ['empty-state-heading'], ['Keybindings'])
+		KeyboardMap
+		h('h2', ['empty-state-heading'], ['About Monocle'])
+		About
+	])
+	_ -> h('div', ['search-results'], [
+		h('ol', ['search-results-list'], (
+			` NOTE: this is an arbitrary heuristic that tries to scale preview size with
+			screen width, and seems to work well enough.`
+			maxPreviewChars := floor(window.innerWidth / 6)
+			highlighter := applyHighlights(State.query)
+			results := (State.showAllResults? :: {
+				true -> State.results
+				_ -> slice(State.results, 0, clippedResultsCount())
+			})
+			map(results, (result, i) => SearchResult(
+				result
+				i
+				highlighter
+				maxPreviewChars
+			))
+		))
+		~(State.showAllResults?) & len(State.results) > clippedResultsCount() :: {
+			true -> hae('button', ['search-results-show-all'], {}, {
+				click: () => render(State.showAllResults? := true)
+			}, ['Show more ...'])
+		}
+		h('div', ['search-results-bottom-padding'], [])
+	])
+}
 
 Sidebar := () => h('div', ['sidebar'], [
 	SearchBox()
@@ -230,13 +296,16 @@ DocPreview := () => h('div', ['doc-preview'], [
 
 ` state updaters `
 
-performSearch := () => (
+performSearch := query => (
+	State.query := query
+
 	start := time()
-	State.results := findDocs(State.index, State.docs, State.query)
+	State.results := findDocs(State.index, State.docs, query)
 	State.searchElapsedMs := floor((time() - start) * 1000)
+
 	State.selectedIdx := 0
 	State.showAllResults? := false
-	trim(State.query, ' ') :: {
+	trim(query, ' ') :: {
 		'' -> (
 			State.showPreview? := false
 
@@ -248,7 +317,7 @@ performSearch := () => (
 		)
 		_ -> (
 			url := jsnew(URL, [location.href])
-			bind(url.searchParams, 'set')('q', trim(State.query, ' '))
+			bind(url.searchParams, 'set')('q', trim(query, ' '))
 			bind(history, 'replaceState')((), (), url)
 
 			document.title := f('"{{ query }}" | Monocle', State)
@@ -304,7 +373,10 @@ bind(document.body, 'addEventListener')('keydown', evt => evt.key :: {
 	'ArrowUp' -> selectUp(evt)
 	'ArrowDown' -> selectDown(evt)
 	'Enter' -> render(State.showPreview? := true)
-	'Escape' -> render(State.showPreview? := false)
+	'Escape' -> State.showPreview? :: {
+		true -> render(State.showPreview? := false)
+		_ -> performSearch('')
+	}
 	'/' -> searchBox := querySelector('.search-box-input') :: {
 		() -> ()
 		_ -> (
