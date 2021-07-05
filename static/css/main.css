@@ -166,11 +166,16 @@ li.search-result {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+    border-left: 3px solid transparent;
 }
 
 .search-result:hover,
 .search-result.selected {
 	background: var(--primary-bg);
+}
+
+.search-result.selected {
+    border-left: 3px solid var(--secondary-text);
 }
 
 .search-result .search-result-module {

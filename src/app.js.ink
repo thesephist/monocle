@@ -28,6 +28,25 @@ clippedResultsCount := () => (
 	floor((window.innerHeight - 96) / ResultHeight)
 )
 
+` utility for server-rendering large numbers with commas `
+zeroFillTo3Digits := s => len(s) :: {
+	0 -> '000'
+	1 -> '00' + s
+	2 -> '0' + s
+	_ -> s
+}
+formatNumber := n => (
+	sub := (acc, n) => n :: {
+		0 -> acc
+		_ -> sub(zeroFillTo3Digits(string(n % 1000)) + ',' + acc, floor(n / 1000))
+	}
+
+	threeDigitStr := sub(zeroFillTo3Digits(string(n % 1000)), floor(n / 1000)) :: {
+		'000' -> '0'
+		_ -> trimPrefix(threeDigitStr, '0')
+	}
+)
+
 applyHighlights := query => (
 	queryTokens := keys(tokenize(State.query))
 	replacementRegExpStr := '(^|\\W)(' + cat(escapeRegExp(queryTokens), '|') + ')'
@@ -91,7 +110,7 @@ SearchBox := () => h('div', ['search-box'], [
 			value: State.query
 			placeholder: State.docs :: {
 				() -> 'Search...'
-				_ -> 'Search ' + string(len(State.docs)) + ' docs'
+				_ -> 'Search ' + formatNumber(len(State.docs)) + ' docs'
 			}
 			autofocus: true
 		}

@@ -41,6 +41,13 @@ b: build
 # run all builds from scratch
 build-all: build-libs build-monocle build
 
+# re-build document indexes
+index:
+	ink src/main.ink
+	# remove control characters that sneak into content. These are filtered out
+	# in the index but not in doc sources, and trips up JSON parsers.
+	tr -d "[:cntrl:]" < static/indexes/docs.json > static/indexes/docs.json
+
 # build whenever Ink sources change
 watch:
 	ls lib/*.ink src/*.ink modules/*.ink | entr make build
