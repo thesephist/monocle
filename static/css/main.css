@@ -173,7 +173,7 @@ textarea {
 
 .search-results-suggestions {
 	overflow: hidden;
-	max-width: 420px;
+	max-width: 60ch;
 	width: 100%;
 }
 

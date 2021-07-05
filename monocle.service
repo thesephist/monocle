@@ -1,0 +1,29 @@
+[Unit]
+Description=monocle server
+ConditionPathExists=/home/monocle-user/go/bin/ink
+After=network.target
+
+[Service]
+Type=simple
+User=monocle-user
+LimitNOFILE=1024
+PermissionsStartOnly=true
+
+Restart=on-failure
+RestartSec=100ms
+StartLimitIntervalSec=60
+
+WormonoclegDirectory=/home/monocle-user/monocle
+ExecStart=/home/monocle-user/go/bin/ink ./src/main.ink
+
+# make sure log directory exists and owned by syslog
+PermissionsStartOnly=true
+ExecStartPre=/bin/mkdir -p /var/log/monocle
+ExecStartPre=/bin/chown syslog:adm /var/log/monocle
+ExecStartPre=/bin/chmod 755 /var/log/monocle
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=monocle
+
+[Install]
+WantedBy=multi-user.target

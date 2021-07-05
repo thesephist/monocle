@@ -2,7 +2,7 @@ all: run
 
 # run app server
 run:
-	rlwrap ink src/main.ink
+	ink src/main.ink
 
 # build dependencies
 build-libs:
@@ -44,11 +44,14 @@ build-all: build-libs build-monocle build
 
 # re-build document indexes
 index:
-	ink src/main.ink
+	ink src/index.ink
 	# remove control characters that sneak into content. These are filtered out
 	# in the index but not in doc sources, and trips up JSON parsers.
 	tr -d '[:cntrl:]' < static/indexes/docs.json > /tmp/docs.json
 	mv /tmp/docs.json static/indexes/docs.json
+	# gzip
+	gzip < static/indexes/docs.json > static/indexes/docs.json.gz
+	gzip < static/indexes/index.json > static/indexes/index.json.gz
 
 # build whenever Ink sources change
 watch:

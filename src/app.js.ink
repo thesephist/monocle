@@ -221,6 +221,7 @@ SearchResults := () => len(State.query) = 0 :: {
 				[
 					'linus lee'
 					'side project idea'
+					'tools for thought'
 					'taylor swift'
 					'uc berkeley'
 					'new york city'
@@ -308,7 +309,12 @@ DocPreview := () => h('div', ['doc-preview'], (
 			])
 			_ -> h('div', ['doc-preview-content'], (
 				highlighter := applyHighlights(State.query)
-				map(split(selectedDoc.content, Newline), para => (
+				nonEmptyLines := filter(
+					split(selectedDoc.content, Newline)
+					` shelling out to JS for performance on long docs `
+					p => len(bind(str(p), 'trim')()) > 0
+				)
+				map(nonEmptyLines, para => (
 					p := bind(document, 'createElement')('p')
 					p.innerHTML := highlighter(para)
 					p

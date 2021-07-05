@@ -1,120 +1,60 @@
+` main.ink serves files `
+
 std := load('../vendor/std')
 str := load('../vendor/str')
-json := load('../vendor/json')
 
 log := std.log
 f := std.format
-scan := std.scan
-map := std.map
-each := std.each
-append := std.append
 readFile := std.readFile
-writeFile := std.writeFile
-split := str.split
-deJSON := json.de
-serJSON := json.ser
 
-tokenizer := load('../lib/tokenizer')
-tokenize := tokenizer.tokenize
-tokenFrequencyMap := tokenizer.tokenFrequencyMap
+http := load('../vendor/http')
+mimeForPath := load('../vendor/mime').forPath
 
-indexer := load('../lib/indexer')
-indexDocs := indexer.indexDocs
+Port := 9999
 
-searcher := load('../lib/searcher')
-findDocs := searcher.findDocs
+server := (http.new)()
+NotFound := {status: 404, body: 'file not found'}
+MethodNotAllowed := {status: 405, body: 'method not allowed'}
 
-` modules `
-Modules := {
-	www: load('../modules/www')
-	entr: load('../modules/entr')
-	mira: load('../modules/mira')
-	tweets: load('../modules/tweets')
-	lifelog: load('../modules/lifelog')
-	ligature: load('../modules/ligature')
-	ideaflow: load('../modules/ideaflow')
-}
-ModuleState := {
-	loadedModules: 0
+serveStatic := path => (req, end) => req.method :: {
+	'GET' -> readFile('static/' + path, file => file :: {
+		() -> end(NotFound)
+		_ -> end({
+			status: 200
+			headers: {'Content-Type': mimeForPath(path)}
+			body: file
+		})
+	})
+	_ -> end(MethodNotAllowed)
 }
 
-` Doc : {
-	id: string
-	tokens: Map<string, number>
-	content: string
+serveGZip := path => (req, end) => req.method :: {
+	'GET' -> readFile('static/indexes/' + path + '.gz', file => file :: {
+		() -> end(NotFound)
+		_ -> end({
+			status: 200
+			headers: {
+				'Content-Type': mimeForPath(path)
+				'Content-Encoding': 'gzip'
+			}
+			body: file
+		})
+	})
+	_ -> end(MethodNotAllowed)
+}
 
-	title: string | ()
-	href: string | ()
-} `
+addRoute := server.addRoute
 
-Docs := []
+` static paths `
+addRoute('/static/*staticPath', params => serveStatic(params.staticPath))
+addRoute('/indexes/*indexPath', params => serveGZip(params.indexPath))
+addRoute('/favicon.ico', params => serveStatic('favicon.ico'))
+addRoute('/', params => serveStatic('index.html'))
 
-lazyGetDocs := (moduleKey, getDocs, withDocs) => readFile(f('./static/indexes/{{ 0 }}.json', [moduleKey]), file => file :: {
-	() -> (
-		log(f('[{{ 0 }}] re-generating index', [moduleKey]))
-		getDocs(docs => writeFile(f('./static/indexes/{{ 0 }}.json', [moduleKey]), serJSON(docs), res => res :: {
-			true -> withDocs(docs)
-			_ -> (
-				log('[main] failed to persist generated index for ' + moduleKey)
-				withDocs(docs)
-			)
-		}))
-	)
-	_ -> withDocs(deJSON(file))
-})
+start := () => (
+	end := (server.start)(Port)
+	log(f('Monocle started, listening on 0.0.0.0:{{0}}', [Port]))
+)
 
-each(keys(Modules), moduleKey => (
-	module := Modules.(moduleKey)
-	getDocs := module.getDocs
-	lazyGetDocs(moduleKey, getDocs, docs => (
-		each(docs, doc => Docs.(doc.id) := (doc.module := moduleKey))
-
-		ModuleState.loadedModules := ModuleState.loadedModules + 1
-		ModuleState.loadedModules :: {
-			len(Modules) -> (
-				next := () => (
-					log('[main] indexing docs...')
-					Index := indexDocs(Docs)
-
-					log('[main] persisting index...')
-					writeFile('./static/indexes/index.json', serJSON(Index), res => res :: {
-						true -> main(Index)
-						_ -> (
-							log('[main] failed to persist index!')
-							main(Index)
-						)
-					})
-				)
-
-				log('[main] persisting docs...')
-				writeFile('./static/indexes/docs.json', serJSON(Docs), res => res :: {
-					true -> next()
-					_ -> (
-						log('[main] failed to persist docs!')
-						next()
-					)
-				})
-
-			)
-		}
-	))
-))
-
-repl := index => (sub := () => (
-	out('> ')
-	scan(line => (
-		start := time()
-		matches := findDocs(index, Docs, line)
-		log(f('searched in {{ 0 }}ms', [floor((time() - start) * 1000)]))
-
-		matches :: {
-			[] -> ()
-			_ -> each(matches, doc => log(doc.content))
-		}
-
-		sub()
-	))
-))()
-
-main := () => log('done.')
+start()
 
