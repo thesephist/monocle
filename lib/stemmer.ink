@@ -33,7 +33,7 @@ getStem := word => (
 		hasSuffix?(word, 'ed') -> removeRepeatedLastLetter(trimSuffix(word, 'ed'))
 		hasSuffix?(word, 'ment') -> trimSuffix(word, 'ment')
 		hasSuffix?(word, 'ly') -> trimSuffix(word, 'ly')
-		hasSuffix?(word, 's') -> trimSuffix(word, 's')
+		len(word) > 1 & hasSuffix?(word, 's') -> trimSuffix(word, 's')
 		_ -> word
 	}
 )
