@@ -23,7 +23,7 @@ removeRepeatedLastLetter := word => len(word) < 3 :: {
 repeatLastLetter := word => word + word.(len(word) - 1)
 
 getStem := word => (
-	true :: {
+	stem := (true :: {
 		hasSuffix?(word, 'ation') -> trimSuffix(word, 'ation') + 'e'
 		hasSuffix?(word, 'tion') -> trimSuffix(word, 'tion') + 'te'
 		hasSuffix?(word, 'ies') -> trimSuffix(word, 'ies') + 'y'
@@ -33,8 +33,12 @@ getStem := word => (
 		hasSuffix?(word, 'ed') -> removeRepeatedLastLetter(trimSuffix(word, 'ed'))
 		hasSuffix?(word, 'ment') -> trimSuffix(word, 'ment')
 		hasSuffix?(word, 'ly') -> trimSuffix(word, 'ly')
-		len(word) > 1 & hasSuffix?(word, 's') -> trimSuffix(word, 's')
+		hasSuffix?(word, 's') -> trimSuffix(word, 's')
 		_ -> word
+	})
+	stem :: {
+		'' -> word
+		_ -> stem
 	}
 )
 
