@@ -3,7 +3,6 @@ used for querying. `
 
 std := load('../vendor/std')
 
-log := std.log
 each := std.each
 
 indexDoc := (index, doc) => each(keys(doc.tokens), token => docIDs := index.(token) :: {

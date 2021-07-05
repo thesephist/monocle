@@ -8,7 +8,6 @@ hand-written loops for maximum performance with the standard Ink interpreter. `
 std := load('../vendor/std')
 str := load('../vendor/str')
 
-log := std.log
 f := std.format
 each := std.each
 reduce := std.reduce
@@ -18,9 +17,11 @@ split := str.split
 lower := str.lower
 
 Stopwords := [
-	'a', 'an', 'are', 'and', 'as', 'at', 'be', 'but', 'by', 'do', 'for'
-	'from', 'have', 'he', 'his', 'i', 'in', 'is', 'it', 'not', 'of', 'on'
-	't', 'that', 'the', 'this', 'to', 'was', 'were', 'with', 'you'
+	'a', 'about', 'an', 'are', 'and', 'as', 'at', 'be', 'but', 'by', 'co'
+	'com', 'do', 'don\'t', 'for', 'from', 'has', 'have', 'he', 'his', 'http'
+	'https', 'i', 'i\'m', 'in', 'is', 'it', 'it\'s', 'just', 'like', 'me'
+	'my', 'not', 'of', 'on', 'or', 'rt', 'so', 't', 'that', 'the', 'they'
+	'this', 'to', 'twitter', 'was', 'we', 'were', 'with', 'you', 'your'
 ]
 StopwordMap := {}
 each(Stopwords, word => StopwordMap.(word) := true)

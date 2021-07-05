@@ -46,6 +46,9 @@ generateVariations := (word, stem) => uniq(filter([
 	word
 
 	stem
+	` sometimes from tokens like "taking" we get the stem "tak", which should
+	really be "take". `
+	stem + 'e'
 	stem + 's'
 	stem + 'ly'
 	stem + 'ment'
