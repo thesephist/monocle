@@ -13,7 +13,7 @@ Restart=on-failure
 RestartSec=100ms
 StartLimitIntervalSec=60
 
-WormonoclegDirectory=/home/monocle-user/monocle
+WorkingDirectory=/home/monocle-user/monocle
 ExecStart=/home/monocle-user/go/bin/ink ./src/main.ink
 
 # make sure log directory exists and owned by syslog
