@@ -1,6 +1,6 @@
 # Monocle 👓
 
-**Monocle** is my universal, personal search engine. It can query across tens of thousands of documents from my blog posts, journal entries, notes, Tweets, contacts, and more to act as my extended memory spanning my entire life. Monocle is designed with a focus on speed, privacy, and hackability.  It's built to be very specific to the particulars of my personal workflow around data, so probably won't work for anyone else. But I might build something similar aimed for the public later. I've written more in depth about this project on [my blog](https://thesephist.com/posts/lmonocle/), and you can try a demo indexed on the public subset of my full data at [monocle.surge.sh](https://monocle.surge.sh/).
+**Monocle** is my universal, personal search engine. It can query across tens of thousands of documents from my blog posts, journal entries, notes, Tweets, contacts, and more to act as my extended memory spanning my entire life. Monocle is designed with a focus on speed, privacy, and hackability.  It's built to be very specific to the particulars of my personal workflow around data, so probably won't work for anyone else. But I might build something similar aimed for the public later. I've written more in depth about this project on [my blog](https://thesephist.com/posts/monocle/), and you can try a demo indexed on the public subset of my full data at [monocle.surge.sh](https://monocle.surge.sh/).
 
 ![Screenshots of Monocle running on iPads](static/img/monocle-banner.png)
 
