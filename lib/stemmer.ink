@@ -52,6 +52,9 @@ generateVariations := (word, stem) => uniq(filter([
 	stem + 's'
 	stem + 'ly'
 	stem + 'ment'
+	` possessive, which does not get tokenized out because it's also often a
+	contracted subject + verb pair `
+	stem + '\'s'
 
 	stem + 'ed'
 	repeatLastLetter(stem) + 'ed'
