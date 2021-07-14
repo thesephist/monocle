@@ -5,7 +5,7 @@ be used outside of the library if desired -- the interface is probably stable. `
 
 std := load('../vendor/std')
 quicksort := load('../vendor/quicksort')
-fastsort := load('../vendor/fastsort.js')
+fastsort := load('fastsort.js')
 
 map := std.map
 reduce := std.reduce

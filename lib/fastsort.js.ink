@@ -1,6 +1,8 @@
 ` fast version of quicksort used in the UI code to sort >1000 docs quickly in
 the ranker, using JavaScript's native array sort. `
 
+std := load('../vendor/std')
+
 ` hacky check to see if we're in a browser. Because the browser environment's
 load() returns window / globalThis, std.location will not be null; otherwise,
 in the native environment std.location will be (). `
