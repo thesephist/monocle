@@ -26,7 +26,7 @@ indexDocs = docs => (() => { let index; index = {}; each(keys(docs), docID => in
 
 std = load(__Ink_String(`../vendor/std`));
 quicksort = load(__Ink_String(`../vendor/quicksort`));
-fastsort = load(__Ink_String(`../vendor/fastsort.js`));
+fastsort = load(__Ink_String(`fastsort.js`));
 map = (() => {let __ink_acc_trgt = __as_ink_string(std); return __is_ink_string(__ink_acc_trgt) ? __ink_acc_trgt.valueOf()[map] || null : (__ink_acc_trgt.map !== undefined ? __ink_acc_trgt.map : null)})();
 reduce = (() => {let __ink_acc_trgt = __as_ink_string(std); return __is_ink_string(__ink_acc_trgt) ? __ink_acc_trgt.valueOf()[reduce] || null : (__ink_acc_trgt.reduce !== undefined ? __ink_acc_trgt.reduce : null)})();
 envSortBy = (() => { return __ink_match((() => {let __ink_acc_trgt = __as_ink_string(fastsort); return __is_ink_string(__ink_acc_trgt) ? __ink_acc_trgt.valueOf()[available__ink_qm__] || null : (__ink_acc_trgt.available__ink_qm__ !== undefined ? __ink_acc_trgt.available__ink_qm__ : null)})(), [[() => (true), () => ((() => {let __ink_acc_trgt = __as_ink_string(fastsort); return __is_ink_string(__ink_acc_trgt) ? __ink_acc_trgt.valueOf()[fastSortBy] || null : (__ink_acc_trgt.fastSortBy !== undefined ? __ink_acc_trgt.fastSortBy : null)})())], [() => (__Ink_Empty), () => ((() => {let __ink_acc_trgt = __as_ink_string(quicksort); return __is_ink_string(__ink_acc_trgt) ? __ink_acc_trgt.valueOf()[sortBy] || null : (__ink_acc_trgt.sortBy !== undefined ? __ink_acc_trgt.sortBy : null)})())]]) })();

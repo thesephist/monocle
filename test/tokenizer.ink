@@ -25,7 +25,6 @@ run := (m, t) => (
 			tokenize('Listen! My name is -- really -- Linus Lee.')
 			{
 				listen: 1
-				my: 1
 				name: 1
 				really: 1
 				linus: 1
@@ -39,10 +38,8 @@ run := (m, t) => (
 				'won\'t': 1
 				first: 1
 				time: 1
-				we: 1
 				see: 1
 				something: 2
-				like: 1
 				crazy: 1
 			}
 		)
