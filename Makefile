@@ -11,6 +11,7 @@ build-libs:
 		vendor/std.ink \
 		vendor/str.ink \
 		vendor/quicksort.ink \
+		lib/fastsort.js.ink \
 		> static/ink/lib.js
 
 build-monocle:

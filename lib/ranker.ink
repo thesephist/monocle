@@ -5,12 +5,16 @@ be used outside of the library if desired -- the interface is probably stable. `
 
 std := load('../vendor/std')
 quicksort := load('../vendor/quicksort')
+fastsort := load('../vendor/fastsort.js')
 
 map := std.map
 reduce := std.reduce
-sortBy := quicksort.sortBy
+envSortBy := (fastsort.available? :: {
+	true -> fastsort.fastSortBy
+	_ -> quicksort.sortBy
+})
 
-rankDocs := (matchingDocs, queryTokens, lenDocs) => sortBy(matchingDocs, doc => (
+rankDocs := (matchingDocs, queryTokens, lenDocs) => envSortBy(matchingDocs, doc => (
 	` if we call keys first, len call is optimized `
 	lenDocTokens := len(keys(doc.tokens))
 
