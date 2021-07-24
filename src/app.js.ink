@@ -17,8 +17,11 @@ escapeHTML := s => (
 	EscapeContainer.textContent := s
 	EscapeContainer.innerHTML
 )
-` TODO: make correct `
-escapeRegExp := s => s
+
+escapeRegExp := s => (
+	re := jsnew(RegExp, [str('[-\/\\^$*+?.()|[\]{}]'), str('g')])
+	bind(s, 'replace')(re, '\\$&')
+)
 
 ` TODO: explain why this is needed `
 fastSlice := (s, start, end) => bind(str(s), 'substring')(start, end)
@@ -49,7 +52,7 @@ formatNumber := n => (
 
 applyHighlights := query => (
 	queryTokenVariations := tokenizeAndVary(State.query)
-	replacementRegExpStr := '(^|\\W)(' + cat(escapeRegExp(queryTokenVariations), '|') + ')'
+	replacementRegExpStr := '(^|\\W)(' + cat(map(queryTokenVariations, escapeRegExp), '|') + ')'
 	replacementRegExp := jsnew(RegExp, [str(replacementRegExpStr), str('ig')])
 
 	` calling out to JavaScript's native String.prototype.replace so we
