@@ -1,6 +1,6 @@
 std := load('../vendor/std')
 str := load('../vendor/str')
-json := load('../vendor/json')
+json := load('../lib/rejson')
 
 log := std.log
 f := std.format

@@ -11,43 +11,47 @@ const PocketDocs = require(SourceFile);
 const PartialDestFile = require(DestFile);
 
 console.log(`Found ${PocketDocs.length} docs, downloading and parsing using @mozilla/readability.`);
+console.log(`Partial cache contained ${PartialDestFile.length} docs.`);
 
 (async function() {
-    const FullTextDocs = [];
+    // Map of href to doc type
+    const FullTextDocs = {};
+    for (const doc of PartialDestFile) {
+        FullTextDocs[doc.href] = doc;
+    }
 
     let i = 0;
     for (const { title, href } of PocketDocs) {
         // To make this process interruptible, we write a partial progress
-        // cache every 50 items.
-        if (i % 100 === 0) {
-            console.log('Writing partial file...');
-            writeFileSync(DestFile, JSON.stringify(FullTextDocs), 'utf8');
+        // cache every 25 items.
+        if (i % 25 === 0) {
+            const docsSoFar = Object.values(FullTextDocs);
+            console.log(`Writing partial cache with ${docsSoFar.length} docs...`);
+            writeFileSync(DestFile, JSON.stringify(docsSoFar), 'utf8');
         }
 
         // Skip attempting to parse media files
         if (href.endsWith('.png') || href.endsWith('.jpg') ||
             href.endsWith('.gif') || href.endsWith('.mp4') ||
             href.endsWith('.mov') || href.endsWith('.pdf')) {
-            FullTextDocs.push({
+            FullTextDocs[href] = {
                 title: title,
                 content: href,
                 href: href,
-            });
+            }
 
             i ++;
             continue;
         }
 
-        const alreadyParsed = PartialDestFile.filter(it => it.href === href)[0];
+        const alreadyParsed = FullTextDocs[href];
         if (alreadyParsed) {
             console.log(`Using ${href} found in partial cache...`);
-            FullTextDocs.push(alreadyParsed);
-
             i ++;
             continue;
-        } else {
-            console.log(`Parsing (${i + 1}/${PocketDocs.length}) ${href}...`);
         }
+
+        console.log(`Parsing (${i + 1}/${PocketDocs.length}) ${href}...`);
 
         // For a number of reasons, either JSDOM or Readability may throw if it
         // fails to parse the page. In those cases, we bail and just keep the
@@ -67,6 +71,17 @@ console.log(`Found ${PocketDocs.length} docs, downloading and parsing using @moz
             });
 
             const page = reader.parse();
+            if (!page) {
+                FullTextDocs[href] = {
+                    title: title,
+                    content: href,
+                    href: href,
+                }
+
+                i ++;
+                continue;
+            }
+
             const {
                 title: readabilityTitle,
                 textContent,
@@ -75,26 +90,35 @@ console.log(`Found ${PocketDocs.length} docs, downloading and parsing using @moz
 
             // If the page is longer than ~10k words, don't cache or index.
             // It's not worth it.
-            if (textContent.length > 5 * 10000) throw new Error('Document too large, not caching').
+            if (textContent.length > 5 * 10000) {
+                FullTextDocs[href] = {
+                    title: title,
+                    content: href,
+                    href: href,
+                }
 
-            FullTextDocs.push({
-                title: `${readabilityTitle} | ${siteName}`,
+                i ++;
+                continue;
+            }
+
+            FullTextDocs[href] = {
+                title: siteName ? `${readabilityTitle} | ${siteName}` : readabilityTitle,
                 content: textContent || href,
                 href: href,
-            });
+            }
         } catch (e) {
             console.log(`Error during parse of ${href} (${e})... continuing.`);
-            FullTextDocs.push({
+            FullTextDocs[href] = {
                 title: title,
                 content: href,
                 href: href,
-            });
+            }
         }
 
         i ++;
     }
 
-    writeFileSync(DestFile, JSON.stringify(FullTextDocs), 'utf8');
-    console.log('done.');
+    writeFileSync(DestFile, JSON.stringify(Object.values(FullTextDocs)), 'utf8');
+    console.log('done!');
 })();
 
