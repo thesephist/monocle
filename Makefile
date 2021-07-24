@@ -48,11 +48,14 @@ index:
 	ink src/index.ink
 	# remove control characters that sneak into content. These are filtered out
 	# in the index but not in doc sources, and trips up JSON parsers.
-	tr -d '[:cntrl:]' < static/indexes/docs.json > /tmp/docs.json
+	LC_ALL=C tr -d '[:cntrl:]' < static/indexes/docs.json > /tmp/docs.json
 	mv /tmp/docs.json static/indexes/docs.json
 	# gzip
 	gzip --best < static/indexes/docs.json > static/indexes/docs.json.gz
 	gzip --best < static/indexes/index.json > static/indexes/index.json.gz
+	# brotli
+	brotli -kZf static/indexes/docs.json
+	brotli -kZf static/indexes/index.json
 
 # build whenever Ink sources change
 watch:

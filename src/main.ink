@@ -6,6 +6,7 @@ str := load('../vendor/str')
 log := std.log
 f := std.format
 readFile := std.readFile
+contains? := str.contains?
 
 http := load('../vendor/http')
 mimeForPath := load('../vendor/mime').forPath
@@ -28,18 +29,38 @@ serveStatic := path => (req, end) => req.method :: {
 	_ -> end(MethodNotAllowed)
 }
 
-serveGZip := path => (req, end) => req.method :: {
-	'GET' -> readFile('static/indexes/' + path + '.gz', file => file :: {
-		() -> end(NotFound)
-		_ -> end({
-			status: 200
-			headers: {
-				'Content-Type': mimeForPath(path)
-				'Content-Encoding': 'gzip'
-			}
-			body: file
-		})
+serveGZip := (path, end) => readFile('static/indexes/' + path + '.gz', file => file :: {
+	() -> end(NotFound)
+	_ -> end({
+		status: 200
+		headers: {
+			'Content-Type': mimeForPath(path)
+			'Content-Encoding': 'gzip'
+		}
+		body: file
 	})
+})
+serveBrotli := (path, end) => readFile('static/indexes/' + path + '.br', file => file :: {
+	() -> end(NotFound)
+	_ -> end({
+		status: 200
+		headers: {
+			'Content-Type': mimeForPath(path)
+			'Content-Encoding': 'br'
+		}
+		body: file
+	})
+})
+serveCompressed := path => (req, end) => req.method :: {
+	'GET' -> acceptEncoding := req.headers.'Accept-Encoding' :: {
+		() -> serveGZip(path, end)
+		` we check brotli compatibility before serving, as it is not as
+		ubiquitous as gzip `
+		_ -> contains?(acceptEncoding, 'br') :: {
+			true -> serveBrotli(path, end)
+			_ -> serveGZip(path, end)
+		}
+	}
 	_ -> end(MethodNotAllowed)
 }
 
@@ -47,7 +68,7 @@ addRoute := server.addRoute
 
 ` static paths `
 addRoute('/static/*staticPath', params => serveStatic(params.staticPath))
-addRoute('/indexes/*indexPath', params => serveGZip(params.indexPath))
+addRoute('/indexes/*indexPath', params => serveCompressed(params.indexPath))
 addRoute('/favicon.ico', params => serveStatic('favicon.ico'))
 addRoute('/', params => serveStatic('index.html'))
 

@@ -1,3 +1,4 @@
 static/indexes/*.json
 static/indexes/*.json.gz
+static/indexes/*.json.br
 node_modules/
