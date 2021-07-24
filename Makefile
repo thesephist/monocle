@@ -51,8 +51,8 @@ index:
 	tr -d '[:cntrl:]' < static/indexes/docs.json > /tmp/docs.json
 	mv /tmp/docs.json static/indexes/docs.json
 	# gzip
-	gzip < static/indexes/docs.json > static/indexes/docs.json.gz
-	gzip < static/indexes/index.json > static/indexes/index.json.gz
+	gzip --best < static/indexes/docs.json > static/indexes/docs.json.gz
+	gzip --best < static/indexes/index.json > static/indexes/index.json.gz
 
 # build whenever Ink sources change
 watch:
