@@ -114,9 +114,11 @@ For third-party data modules `tweets`, `pocket`, and `ideaflow`, I need to pre-p
 	}[]
 	```
 - For bookmarks I've saved on Pocket, I click on "Export" under "Manage my account" in the web interface to get an HTML archive of all my bookmarked notes. I do this instead of going through the API because this is much faster than waiting for Pocket's API rate limits if I simply want to get a list of URLs, which is all I need.
+
 	After I have that list of URLs, I open it in the browser and run the little JavaScript snippet in `modules/pocket.ink` to produce a JSON of titles and links.
+
 	Then, I run _that_ through `node modules/pocket-full-text/index.js` which optionally downloads, parses, and re-saves a full-text archive of all of those pages using Mozilla's excellent [Readability.js](https://github.com/mozilla/readability) library. This is to make the full text of all of those bookmarked pages indexable in Monocle. This produces a JSON array saved to the specified destination file of the following format:
-	```
+	```ts
 	type Page = {
 		title: string // document title + site name
 		content: string // parsed full text of the bookmarked page
@@ -136,11 +138,10 @@ For third-party data modules `tweets`, `pocket`, and `ideaflow`, I need to pre-p
 
 Monocle is reasonably feature-complete, enough for me to use it day to day without any problems or pain points. But there are some lingering ideas I'd like to try.
 
-- Richer previews in the right pane, rendering basic Markdown
+- Richer previews in the right pane, rendering basic Markdown and images
 - Support for literal match queries (e.g. "note-taking") and `NOT` / `OR` in the query
 
 I also want to try adding these data sources as modules.
 
-- Browser history
 - YouTube watch history
 - The other smaller blogs I have: dotink.co, linus.coffee
