@@ -30,6 +30,7 @@ Modules := {
 	entr: load('../modules/entr')
 	mira: load('../modules/mira')
 	tweets: load('../modules/tweets')
+	pocket: load('../modules/pocket')
 	lifelog: load('../modules/lifelog')
 	ligature: load('../modules/ligature')
 	ideaflow: load('../modules/ideaflow')
