@@ -104,7 +104,7 @@ Monocle, like most Ink projects, (ab)uses a Makefile for development tasks. Here
 
 Nearly all the modules, except third-party data sources mentioned below, pull data out of disk from an installation of [Noct](https://github.com/thesephist/polyx#noct), my custom file storage and sync layer shared across many of my productivity tools. Each module depends on its data being stored at a specific path within the user's Noct directory root. You can usually find this path by reading the module's source code. Running `make index` will generally do the right thing here.
 
-For third-party data modules `tweet` and `ideaflow`, I need to pre-process the data into a JSON file, and then point these modules to those files.
+For third-party data modules `tweets`, `pocket`, and `ideaflow`, I need to pre-process the data into a JSON file, and then point these modules to those files.
 
 - For Tweets, I export my Tweets from Twitter using the archive / export feature, and save a JSON array of my Tweets with schema
 	```ts
@@ -113,6 +113,17 @@ For third-party data modules `tweet` and `ideaflow`, I need to pre-process the d
 		content: string // Tweet full_text, with expanded entities
 	}[]
 	```
+- For bookmarks I've saved on Pocket, I click on "Export" under "Manage my account" in the web interface to get an HTML archive of all my bookmarked notes. I do this instead of going through the API because this is much faster than waiting for Pocket's API rate limits if I simply want to get a list of URLs, which is all I need.
+	After I have that list of URLs, I open it in the browser and run the little JavaScript snippet in `modules/pocket.ink` to produce a JSON of titles and links.
+	Then, I run _that_ through `node modules/pocket-full-text/index.js` which optionally downloads, parses, and re-saves a full-text archive of all of those pages using Mozilla's excellent [Readability.js](https://github.com/mozilla/readability) library. This is to make the full text of all of those bookmarked pages indexable in Monocle. This produces a JSON array saved to the specified destination file of the following format:
+	```
+	type Page = {
+		title: string // document title + site name
+		content: string // parsed full text of the bookmarked page
+		href: string // link to the bookmarked page
+	}[]
+	```
+	Finally, I run the indexer in `modules/pocket.ink`.
 - For Ideaflow notes, I serialize my notes out to text and similarly save them into a JSON array of notes with schema
 	```ts
 	type Notes = {

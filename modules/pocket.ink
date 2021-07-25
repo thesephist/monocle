@@ -11,7 +11,7 @@ JSON.stringify(Array.from(document.querySelectorAll('a')).map(a => {
         title: a.textContent,
         href: a.href,
     };
-}).slice(0, 100));
+}));
 `
 
 std := load('../vendor/std')
@@ -39,7 +39,7 @@ tokenFrequencyMap := tokenizer.tokenFrequencyMap
 
 Newline := char(10)
 
-PocketExportPath := '/tmp/pocket.json'
+PocketExportPath := '/tmp/pocket-full-text.json'
 
 getDocs := withDocs => readFile(PocketExportPath, file => file :: {
 	() -> (
@@ -51,8 +51,8 @@ getDocs := withDocs => readFile(PocketExportPath, file => file :: {
 		docs := map(links, (link, i) => (
 			{
 				id: 'pk' + string(i)
-				tokens: tokenize(link.title + ' ' + link.href)
-				content: link.href
+				tokens: tokenize(link.title + ' ' + link.href + ' ' + link.content)
+				content: link.content
 				title: link.title
 				href: link.href
 			}
