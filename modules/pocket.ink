@@ -57,7 +57,7 @@ getDocs := withDocs => readFile(PocketExportPath, file => file :: {
 				tokens: tokenize(link.title + ' ' + link.href + ' ' + link.content)
 				` take the first 200 words or so, so our doc index doens't blow
 				up completely in size `
-				content: slice(link.content, 0, 1000)
+				content: link.href + Newline + slice(link.content, 0, 1000)
 				title: link.title
 				href: link.href
 			}
