@@ -18,12 +18,13 @@ escapeHTML := s => (
 	EscapeContainer.innerHTML
 )
 
-escapeRegExp := s => (
-	re := jsnew(RegExp, [str('[-\/\\^$*+?.()|[\]{}]'), str('g')])
-	bind(s, 'replace')(re, '\\$&')
-)
+EscapeRE := jsnew(RegExp, [str('[-\/\\^$*+?.()|[\]{}]'), str('g')])
+escapeRegExp := s => bind(str(s), 'replace')(EscapeRE, '\\$&')
 
-` TODO: explain why this is needed `
+` Ink standard library's std.slice is O(n), which is normally fine because our
+constant multiplier is pretty small. But when we're doing it for lots of long
+strings as is the case here, we want to get down to native implementations in
+the underlying JavaScript engine. `
 fastSlice := (s, start, end) => bind(str(s), 'substring')(start, end)
 
 clippedResultsCount := () => (
