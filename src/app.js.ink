@@ -423,7 +423,16 @@ bind(document.body, 'addEventListener')('keydown', evt => evt.key :: {
 	}
 	'ArrowUp' -> selectUp(evt)
 	'ArrowDown' -> selectDown(evt)
-	'Enter' -> render(State.showPreview? := true)
+	'Enter' -> evt.ctrlKey | evt.metaKey :: {
+		true -> selectedDoc := State.results.(State.selectedIdx) :: {
+			() -> ()
+			_ -> href := selectedDoc.href :: {
+				() -> ()
+				_ -> open(href, str('_blank'))
+			}
+		}
+		_ -> render(State.showPreview? := true)
+	}
 	'Escape' -> State.showPreview? :: {
 		true -> render(State.showPreview? := false)
 		_ -> (
