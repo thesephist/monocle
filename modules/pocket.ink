@@ -1,7 +1,7 @@
 ` Module "pocket" indexes entries from my read-it-later and cross-browser
 bookmarking app of choice, Pocket. Rather than using the API, this module reads
 from the much simpler "Export" file from under "Manage my account" menu in
-Pocket's web interface.
+Pocket's web interface, which is also available at getpocket.com/export.
 
 The serialized Pocket export, on which this module operates, can be obtained
 with the code:
