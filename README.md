@@ -113,7 +113,7 @@ For third-party data modules `tweets`, `pocket`, and `ideaflow`, I need to pre-p
 		content: string // Tweet full_text, with expanded entities
 	}[]
 	```
-- For bookmarks I've saved on Pocket, I click on "Export" under "Manage my account" in the web interface to get an HTML archive of all my bookmarked notes. I do this instead of going through the API because this is much faster than waiting for Pocket's API rate limits if I simply want to get a list of URLs, which is all I need.
+- For bookmarks I've saved on Pocket, I click on "Export" under "Manage your account" in the web interface to get an HTML archive of all my bookmarked notes. I do this instead of going through the API because this is much faster than waiting for Pocket's API rate limits if I simply want to get a list of URLs, which is all I need. This functionality is also accessible at [https://getpocket.com/export](https://getpocket.com/export).
 
 	After I have that list of URLs, I open it in the browser and run the little JavaScript snippet in `modules/pocket.ink` to produce a JSON of titles and links.
 
